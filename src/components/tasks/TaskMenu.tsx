@@ -27,7 +27,7 @@ import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
-import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { calculateDateDifference, generateUUID, showToast, getNextRecurrenceDate } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,12 +70,31 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+      const isCurrentlyDone = selectedTask.done;
+      const updatedTasksBase = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+      let updatedTasks = updatedTasksBase;
+
+      // If marking as done and task is recurring, create next occurrence immediately
+      if (!isCurrentlyDone && selectedTask.recurrence && selectedTask.recurrence !== "none") {
+        const nextDeadline = selectedTask.deadline
+          ? getNextRecurrenceDate(new Date(selectedTask.deadline), selectedTask.recurrence)
+          : undefined;
+        const nextTask: Task = {
+          ...selectedTask,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: nextDeadline,
+          lastSave: undefined,
+        };
+        updatedTasks = [...updatedTasksBase, nextTask];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,

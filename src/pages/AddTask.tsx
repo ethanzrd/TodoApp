@@ -13,6 +13,7 @@ import { generateUUID, getFontColor, isDark, showToast } from "../utils";
 import { ColorPalette } from "../theme/themeConfig";
 import InputThemeProvider from "../contexts/InputThemeProvider";
 import { CategorySelect } from "../components/CategorySelect";
+import { MenuItem } from "@mui/material";
 import { useToasterStore } from "react-hot-toast";
 
 const AddTask = () => {
@@ -36,6 +37,11 @@ const AddTask = () => {
   );
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
+  const [recurrence, setRecurrence] = useStorageState<"none" | "daily" | "weekly" | "monthly">(
+    "none",
+    "recurrence",
+    "sessionStorage",
+  );
 
   const n = useNavigate();
   const { toasts } = useToasterStore();
@@ -111,6 +117,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence !== "none" ? recurrence : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +136,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -164,6 +179,19 @@ const AddTask = () => {
                   : nameError
             }
           />
+          <StyledInput
+            select
+            label="Repeat"
+            name="recurrence"
+            value={recurrence}
+            onChange={(e) => setRecurrence(e.target.value as any)}
+            helperText={undefined}
+          >
+            <MenuItem value="none">Does not repeat</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </StyledInput>
           <StyledInput
             label="Task Description"
             name="name"

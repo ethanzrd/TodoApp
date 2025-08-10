@@ -9,6 +9,7 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -84,6 +85,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -182,6 +184,21 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
               : "Name is required"
           }
         />
+        <StyledInput
+          select
+          label="Repeat"
+          name="recurrence"
+          value={editedTask?.recurrence || "none"}
+          onChange={(e) => {
+            const value = e.target.value as "none" | "daily" | "weekly" | "monthly";
+            setEditedTask((prev) => ({ ...(prev as Task), recurrence: value === "none" ? undefined : value }));
+          }}
+        >
+          <MenuItem value="none">Does not repeat</MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </StyledInput>
         <StyledInput
           label="Description"
           name="description"

@@ -57,6 +57,10 @@ export interface Task {
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
   position?: number;
+  /**
+   * Optional recurrence interval for the task.
+   */
+  recurrence?: RecurrenceOption;
 }
 
 /**
@@ -93,3 +97,5 @@ export interface AppSettings {
 
 export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom";
 export type ReduceMotionOption = "system" | "on" | "off";
+
+export type RecurrenceOption = "none" | "daily" | "weekly" | "monthly";
