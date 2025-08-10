@@ -14,6 +14,8 @@ import { ColorPalette } from "../theme/themeConfig";
 import InputThemeProvider from "../contexts/InputThemeProvider";
 import { CategorySelect } from "../components/CategorySelect";
 import { useToasterStore } from "react-hot-toast";
+import type { Recurrence } from "../types/user";
+import { MenuItem } from "@mui/material";
 
 const AddTask = () => {
   const { user, setUser } = useContext(UserContext);
@@ -27,6 +29,11 @@ const AddTask = () => {
     "sessionStorage",
   );
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
+  const [recurrence, setRecurrence] = useStorageState<Recurrence | "">(
+    "",
+    "recurrence",
+    "sessionStorage",
+  );
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
@@ -85,6 +92,10 @@ const AddTask = () => {
     setDeadline(event.target.value);
   };
 
+  const handleRecurrenceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRecurrence((event.target.value || "") as Recurrence | "");
+  };
+
   const handleAddTask = () => {
     if (name === "") {
       showToast("Task name is required.", {
@@ -110,6 +121,7 @@ const AddTask = () => {
       color,
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
+      recurrence: recurrence || undefined,
       category: selectedCategories ? selectedCategories : [],
     };
 
@@ -129,7 +141,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +231,20 @@ const AddTask = () => {
               },
             }}
           />
+
+          <StyledInput
+            select
+            label="Recurrence"
+            name="recurrence"
+            value={recurrence}
+            onChange={handleRecurrenceChange}
+            helperText="Repeat interval"
+          >
+            <MenuItem value="">None</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>

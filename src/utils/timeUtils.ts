@@ -22,6 +22,11 @@ const formatDateOnly = (date: Date): string =>
     day: "2-digit",
   });
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+import type { Recurrence } from "../types/user";
+
 /**
  * Returns a human-readable relative time string (e.g. "in 2 days")
  */
@@ -116,4 +121,33 @@ export const calculateDateDifference = (
 
   // beyond 7 days
   return rtf.format(dayDiff, "day");
+};
+
+/**
+ * Returns the next date based on the provided recurrence interval.
+ * The time component of the original date is preserved.
+ *
+ * @param date        The base date to shift.
+ * @param recurrence  Interval to add (daily, weekly, monthly).
+ * @returns           A new Date object shifted by the interval.
+ */
+export const getNextRecurrenceDate = (date: Date, recurrence: Recurrence): Date => {
+  const next = new Date(date); // clone to avoid mutating original
+
+  switch (recurrence) {
+    case "daily":
+      next.setDate(next.getDate() + 1);
+      break;
+    case "weekly":
+      next.setDate(next.getDate() + 7);
+      break;
+    case "monthly":
+      next.setMonth(next.getMonth() + 1);
+      break;
+    default:
+      // Unsupported value -> return original clone without change
+      break;
+  }
+
+  return next;
 };

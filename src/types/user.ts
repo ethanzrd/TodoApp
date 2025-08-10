@@ -50,6 +50,10 @@ export interface Task {
    */
   date: Date;
   deadline?: Date;
+  /**
+   * Recurrence interval for the task (daily, weekly, monthly).
+   */
+  recurrence?: Recurrence;
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
@@ -93,3 +97,8 @@ export interface AppSettings {
 
 export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom";
 export type ReduceMotionOption = "system" | "on" | "off";
+
+/**
+ * Supported recurrence intervals for tasks.
+ */
+export type Recurrence = "daily" | "weekly" | "monthly";
