@@ -6,6 +6,7 @@ export { saveQRCode } from "./saveQRCode";
 export { showToast } from "./showToast";
 export { generateUUID } from "./generateUUID";
 export { timeAgo, formatDate, calculateDateDifference } from "./timeUtils";
+export { getNextOccurrence } from "./recurrence";
 export {
   initDB,
   deleteProfilePictureFromDB,

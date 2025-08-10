@@ -9,6 +9,7 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -67,7 +68,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     // Update the editedTask state with the changed value.
     setEditedTask((prevTask) => ({
       ...(prevTask as Task),
-      [name]: value,
+      [name]: name === "recurrence" && value === "none" ? undefined : value,
     }));
   };
   // Event handler for saving the edited task.
@@ -83,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             emoji: editedTask.emoji || undefined,
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
+            recurrence: editedTask.recurrence || undefined,
             category: editedTask.category || undefined,
             lastSave: new Date(),
           };
@@ -241,6 +243,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <StyledInput
+          select
+          label="Recurrence"
+          name="recurrence"
+          value={editedTask?.recurrence || "none"}
+          onChange={handleInputChange}
+        >
+          <MenuItem value="none">None</MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

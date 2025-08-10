@@ -7,6 +7,8 @@ export type UUID = ReturnType<typeof crypto.randomUUID>;
 
 export type DarkModeOptions = "system" | "auto" | "light" | "dark";
 
+export type Recurrence = "daily" | "weekly" | "monthly";
+
 /**
  * Represents a user in the application.
  */
@@ -50,6 +52,7 @@ export interface Task {
    */
   date: Date;
   deadline?: Date;
+  recurrence?: Recurrence;
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
