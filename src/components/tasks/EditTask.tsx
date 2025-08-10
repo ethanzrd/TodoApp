@@ -4,8 +4,13 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
   IconButton,
   InputAdornment,
+  Radio,
+  RadioGroup,
   TextField,
   TextFieldProps,
   Tooltip,
@@ -84,6 +89,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +247,70 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <FormControl
+          component="fieldset"
+          style={{
+            marginTop: "14px",
+            color: theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark,
+          }}
+        >
+          <FormLabel
+            component="legend"
+            style={{ color: theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark }}
+          >
+            Recurrence
+          </FormLabel>
+          <RadioGroup
+            row
+            aria-label="recurrence"
+            name="recurrence"
+            value={editedTask?.recurrence || ""}
+            onChange={(e) => {
+              setEditedTask((prevTask) => ({
+                ...(prevTask as Task),
+                recurrence: e.target.value as "daily" | "weekly" | "monthly" | undefined,
+              }));
+            }}
+          >
+            <FormControlLabel
+              value=""
+              control={
+                <Radio
+                  sx={{ color: theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark }}
+                />
+              }
+              label="None"
+            />
+            <FormControlLabel
+              value="daily"
+              control={
+                <Radio
+                  sx={{ color: theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark }}
+                />
+              }
+              label="Daily"
+            />
+            <FormControlLabel
+              value="weekly"
+              control={
+                <Radio
+                  sx={{ color: theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark }}
+                />
+              }
+              label="Weekly"
+            />
+            <FormControlLabel
+              value="monthly"
+              control={
+                <Radio
+                  sx={{ color: theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark }}
+                />
+              }
+              label="Monthly"
+            />
+          </RadioGroup>
+        </FormControl>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

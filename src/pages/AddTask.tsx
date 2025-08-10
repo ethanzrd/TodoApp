@@ -3,7 +3,16 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import {
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  IconButton,
+  InputAdornment,
+  Radio,
+  RadioGroup,
+  Tooltip,
+} from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -34,6 +43,7 @@ const AddTask = () => {
     "categories",
     "sessionStorage",
   );
+  const [recurrence, setRecurrence] = useStorageState<string>("", "recurrence", "sessionStorage");
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
 
@@ -111,6 +121,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence ? (recurrence as "daily" | "weekly" | "monthly") : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +140,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +230,44 @@ const AddTask = () => {
               },
             }}
           />
+
+          <FormControl
+            component="fieldset"
+            style={{ marginTop: "14px", color: getFontColor(theme.secondary) }}
+          >
+            <FormLabel component="legend" style={{ color: getFontColor(theme.secondary) }}>
+              Recurrence
+            </FormLabel>
+            <RadioGroup
+              row
+              aria-label="recurrence"
+              name="recurrence"
+              value={recurrence}
+              onChange={(e) => setRecurrence(e.target.value as "daily" | "weekly" | "monthly" | "")}
+              sx={{ color: getFontColor(theme.secondary) }}
+            >
+              <FormControlLabel
+                value=""
+                control={<Radio sx={{ color: getFontColor(theme.secondary) }} />}
+                label="None"
+              />
+              <FormControlLabel
+                value="daily"
+                control={<Radio sx={{ color: getFontColor(theme.secondary) }} />}
+                label="Daily"
+              />
+              <FormControlLabel
+                value="weekly"
+                control={<Radio sx={{ color: getFontColor(theme.secondary) }} />}
+                label="Weekly"
+              />
+              <FormControlLabel
+                value="monthly"
+                control={<Radio sx={{ color: getFontColor(theme.secondary) }} />}
+                label="Monthly"
+              />
+            </RadioGroup>
+          </FormControl>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>
