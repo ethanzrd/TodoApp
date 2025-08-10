@@ -59,6 +59,7 @@ export interface Task {
   position?: number;
   /**
    * Optional recurrence interval for the task.
+   * Backward compatible: if omitted/undefined, the task is treated as non-recurring.
    */
   recurrence?: RecurrenceOption;
 }
