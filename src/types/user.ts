@@ -52,6 +52,10 @@ export interface Task {
    */
   date: Date;
   deadline?: Date;
+  /**
+   * Optional recurrence interval; existing tasks without this field remain valid,
+   * ensuring backward compatibility.
+   */
   recurrence?: Recurrence;
   category?: Category[];
   lastSave?: Date;
