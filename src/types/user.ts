@@ -57,6 +57,12 @@ export interface Task {
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
   position?: number;
+  /**
+   * Optional recurrence rule for the task.
+   * Can be 'daily', 'weekly', or 'monthly'.
+   * This property is optional to ensure backward compatibility with existing tasks.
+   * If not present, the task is considered non-recurring.
+   */
   recurrence?: "daily" | "weekly" | "monthly";
 }
 
