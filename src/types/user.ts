@@ -60,6 +60,8 @@ export interface Task {
   /**
    * Optional recurrence pattern for the task.
    * If provided, a new task instance will be generated when the task is marked as done.
+   *
+   * // Non-breaking: optional field added; existing tasks remain valid.
    */
   recurrence?: Recurrence;
 }
@@ -101,5 +103,7 @@ export type ReduceMotionOption = "system" | "on" | "off";
 
 /**
  * Represents a supported recurrence interval for tasks.
+ *
+ * Non-breaking additive type: existing data without this field continues to work.
  */
 export type Recurrence = "daily" | "weekly" | "monthly";

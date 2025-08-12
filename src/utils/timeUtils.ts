@@ -123,6 +123,7 @@ export const calculateDateDifference = (
  * @param date      Current reference date.
  * @param recurrence Recurrence interval: "daily" | "weekly" | "monthly".
  * @returns A new `Date` representing the next occurrence.
+ * (Non-breaking additive utility – existing code that doesn't use it is unaffected.)
  */
 export const getNextOccurrenceDate = (
   date: Date,
