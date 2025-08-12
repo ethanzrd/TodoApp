@@ -6,6 +6,7 @@ import {
   DialogContent,
   IconButton,
   InputAdornment,
+  MenuItem,
   TextField,
   TextFieldProps,
   Tooltip,
@@ -64,7 +65,16 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
-    // Update the editedTask state with the changed value.
+    // Special handling for deadline (needs to be stored as Date | undefined)
+    if (name === "deadline") {
+      setEditedTask((prevTask) => ({
+        ...(prevTask as Task),
+        deadline: value ? new Date(value) : undefined,
+      }));
+      return;
+    }
+
+    // Update the editedTask state with the changed value for other fields
     setEditedTask((prevTask) => ({
       ...(prevTask as Task),
       [name]: value,
@@ -84,6 +94,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +252,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <StyledInput
+          label="Recurrence"
+          name="recurrence"
+          select
+          value={editedTask?.recurrence || "none"}
+          onChange={handleInputChange}
+        >
+          <MenuItem value="none">None</MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

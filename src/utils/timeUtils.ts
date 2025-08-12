@@ -117,3 +117,33 @@ export const calculateDateDifference = (
   // beyond 7 days
   return rtf.format(dayDiff, "day");
 };
+
+/**
+ * Calculates the next occurrence date based on the provided recurrence rule.
+ * @param date      Current reference date.
+ * @param recurrence Recurrence interval: "daily" | "weekly" | "monthly".
+ * @returns A new `Date` representing the next occurrence.
+ */
+export const getNextOccurrenceDate = (
+  date: Date,
+  recurrence: "daily" | "weekly" | "monthly",
+): Date => {
+  const next = new Date(date);
+
+  switch (recurrence) {
+    case "daily":
+      next.setDate(next.getDate() + 1);
+      break;
+    case "weekly":
+      next.setDate(next.getDate() + 7);
+      break;
+    case "monthly":
+      // JS Date auto-adjust handles month overflow (e.g., Jan 31 -> Feb 28/29)
+      next.setMonth(next.getMonth() + 1);
+      break;
+    default:
+      throw new Error(`Unsupported recurrence value: ${recurrence}`);
+  }
+
+  return next;
+};

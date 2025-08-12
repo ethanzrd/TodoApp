@@ -27,7 +27,12 @@ import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
-import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import {
+  calculateDateDifference,
+  generateUUID,
+  getNextOccurrenceDate,
+  showToast,
+} from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,15 +75,40 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      const newOccurrences: Task[] = [];
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
-          return { ...task, done: !task.done, lastSave: new Date() };
+          const toggledTask = { ...task, done: !task.done, lastSave: new Date() };
+
+          // If we just marked the task as done and it is recurring with a deadline,
+          // create the next occurrence immediately.
+          if (
+            !task.done && // it was previously not done (now becoming done)
+            task.recurrence &&
+            task.deadline
+          ) {
+            const nextDeadline = getNextOccurrenceDate(
+              new Date(task.deadline),
+              task.recurrence,
+            );
+            const nextTask: Task = {
+              ...task,
+              id: generateUUID(),
+              done: false,
+              date: new Date(),
+              deadline: nextDeadline,
+              lastSave: undefined,
+            };
+            newOccurrences.push(nextTask);
+          }
+
+          return toggledTask;
         }
         return task;
       });
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: [...updatedTasks, ...newOccurrences],
       }));
 
       const allTasksDone = updatedTasks.every((task) => task.done);

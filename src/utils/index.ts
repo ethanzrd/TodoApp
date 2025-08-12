@@ -5,7 +5,12 @@ export { systemInfo } from "./getSystemInfo";
 export { saveQRCode } from "./saveQRCode";
 export { showToast } from "./showToast";
 export { generateUUID } from "./generateUUID";
-export { timeAgo, formatDate, calculateDateDifference } from "./timeUtils";
+export {
+  timeAgo,
+  formatDate,
+  calculateDateDifference,
+  getNextOccurrenceDate,
+} from "./timeUtils";
 export {
   initDB,
   deleteProfilePictureFromDB,

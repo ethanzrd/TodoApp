@@ -57,6 +57,11 @@ export interface Task {
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
   position?: number;
+  /**
+   * Optional recurrence pattern for the task.
+   * If provided, a new task instance will be generated when the task is marked as done.
+   */
+  recurrence?: Recurrence;
 }
 
 /**
@@ -93,3 +98,8 @@ export interface AppSettings {
 
 export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom";
 export type ReduceMotionOption = "system" | "on" | "off";
+
+/**
+ * Represents a supported recurrence interval for tasks.
+ */
+export type Recurrence = "daily" | "weekly" | "monthly";
