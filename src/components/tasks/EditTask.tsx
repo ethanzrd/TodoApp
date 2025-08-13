@@ -252,47 +252,38 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             onCategoryChange={(categories) => setSelectedCategories(categories)}
           />
         )}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "8px",
+        <FormControl sx={{ mt: 2, width: "100%" }}>
+          <InputLabel id="recurrence-edit-label">Recurrence</InputLabel>
+          <Select
+            labelId="recurrence-edit-label"
+            name="recurrence"
+            value={editedTask?.recurrence || "none"}
+            label="Recurrence"
+            onChange={(e) =>
+              setEditedTask((prev) => ({
+                ...(prev as Task),
+                recurrence: e.target.value as Recurrence,
+              }))
+            }
+            sx={{ maxWidth: 400 }}
+          >
+            <MenuItem value="none">None</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </Select>
+        </FormControl>
+        <ColorPicker
+          width={"100%"}
+          color={editedTask?.color || "#000000"}
+          fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
+          onColorChange={(color) => {
+            setEditedTask((prevTask) => ({
+              ...(prevTask as Task),
+              color: color,
+            }));
           }}
-        >
-          <ColorPicker
-            width={"100%"}
-            color={editedTask?.color || "#000000"}
-            fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
-            onColorChange={(color) => {
-              setEditedTask((prevTask) => ({
-                ...(prevTask as Task),
-                color: color,
-              }));
-            }}
-          />
-          <FormControl sx={{ mt: 2, width: "100%" }}>
-            <InputLabel id="recurrence-edit-label">Recurrence</InputLabel>
-            <Select
-              labelId="recurrence-edit-label"
-              name="recurrence"
-              value={editedTask?.recurrence || "none"}
-              label="Recurrence"
-              onChange={(e) =>
-                setEditedTask((prev) => ({
-                  ...(prev as Task),
-                  recurrence: e.target.value as Recurrence,
-                }))
-              }
-              sx={{ maxWidth: 400 }}
-            >
-              <MenuItem value="none">None</MenuItem>
-              <MenuItem value="daily">Daily</MenuItem>
-              <MenuItem value="weekly">Weekly</MenuItem>
-              <MenuItem value="monthly">Monthly</MenuItem>
-            </Select>
-          </FormControl>
-        </div>
+        />
       </DialogContent>
       <DialogActions>
         <DialogBtn onClick={handleCancel}>Cancel</DialogBtn>
