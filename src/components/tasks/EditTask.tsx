@@ -253,7 +253,8 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
               recurrence: (e.target.value as "" | "daily" | "weekly" | "monthly") || undefined,
             }))
           }
-          SelectProps={{ native: true }}
+          SelectProps={{ native: true, displayEmpty: true }}
+          InputLabelProps={{ shrink: true }}
           sx={{ mb: "14px" }}
         >
           <option value="">None</option>

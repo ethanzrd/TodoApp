@@ -243,7 +243,8 @@ const AddTask = () => {
           label="Recurrence"
           value={recurrence}
           onChange={(e) => setRecurrence(e.target.value as "" | "daily" | "weekly" | "monthly")}
-          SelectProps={{ native: true }}
+          SelectProps={{ native: true, displayEmpty: true }}
+          InputLabelProps={{ shrink: true }}
           sx={{ mb: "14px" }}
         >
           <option value="">None</option>
