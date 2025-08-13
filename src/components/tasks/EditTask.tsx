@@ -20,6 +20,8 @@ import { formatDate, showToast, timeAgo } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { ColorPalette } from "../../theme/themeConfig";
 import { CategorySelect } from "../CategorySelect";
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import type { Recurrence } from "../../types/user";
 
 interface EditTaskProps {
   open: boolean;
@@ -84,6 +86,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || "none",
             lastSave: new Date(),
           };
         }
@@ -268,6 +271,27 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
               }));
             }}
           />
+          <FormControl sx={{ mt: 2, width: "100%" }}>
+            <InputLabel id="recurrence-edit-label">Recurrence</InputLabel>
+            <Select
+              labelId="recurrence-edit-label"
+              name="recurrence"
+              value={editedTask?.recurrence || "none"}
+              label="Recurrence"
+              onChange={(e) =>
+                setEditedTask((prev) => ({
+                  ...(prev as Task),
+                  recurrence: e.target.value as Recurrence,
+                }))
+              }
+              sx={{ maxWidth: 400 }}
+            >
+              <MenuItem value="none">None</MenuItem>
+              <MenuItem value="daily">Daily</MenuItem>
+              <MenuItem value="weekly">Weekly</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+            </Select>
+          </FormControl>
         </div>
       </DialogContent>
       <DialogActions>

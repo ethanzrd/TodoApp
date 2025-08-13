@@ -37,6 +37,8 @@ export interface User {
 /**
  * Represents a task in the application.
  */
+export type Recurrence = "none" | "daily" | "weekly" | "monthly";
+
 export interface Task {
   id: UUID;
   done: boolean;
@@ -53,6 +55,7 @@ export interface Task {
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
+  recurrence?: Recurrence;
   /**
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
