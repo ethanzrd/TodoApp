@@ -84,6 +84,10 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence:
+              editedTask.recurrence && editedTask.recurrence !== "none"
+                ? editedTask.recurrence
+                : undefined,
             lastSave: new Date(),
           };
         }
@@ -241,7 +245,22 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
-
+        <StyledInput
+          select
+          label="Recurrence"
+          name="recurrence"
+          value={editedTask?.recurrence || "none"}
+          onChange={handleInputChange}
+          SelectProps={{ native: true }}
+          sx={{
+            mt: 2,
+          }}
+        >
+          <option value="none">Does not repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect
             fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}

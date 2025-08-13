@@ -34,6 +34,11 @@ const AddTask = () => {
     "categories",
     "sessionStorage",
   );
+  const [recurrence, setRecurrence] = useStorageState<"none" | "daily" | "weekly" | "monthly">(
+    "none",
+    "recurrence",
+    "sessionStorage",
+  );
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
 
@@ -111,6 +116,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence === "none" ? undefined : recurrence,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +135,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +225,24 @@ const AddTask = () => {
               },
             }}
           />
+          <StyledInput
+            select
+            label="Recurrence"
+            name="recurrence"
+            value={recurrence}
+            onChange={(e) =>
+              setRecurrence(e.target.value as "none" | "daily" | "weekly" | "monthly")
+            }
+            SelectProps={{ native: true }}
+            sx={{
+              mt: 1,
+            }}
+          >
+            <option value="none">Does not repeat</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>
