@@ -37,6 +37,8 @@ export interface User {
 /**
  * Represents a task in the application.
  */
+export type Recurrence = "daily" | "weekly" | "monthly";
+
 export interface Task {
   id: UUID;
   done: boolean;
@@ -50,6 +52,7 @@ export interface Task {
    */
   date: Date;
   deadline?: Date;
+  recurrence?: Recurrence;
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;

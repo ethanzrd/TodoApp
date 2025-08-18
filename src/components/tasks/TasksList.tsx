@@ -29,7 +29,7 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { generateUUID, getFontColor, showToast } from "../../utils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,17 +267,42 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
-        if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
-          return { ...task, done: true, lastSave: new Date() };
+    setUser((prevUser) => {
+      const newTasks = [...prevUser.tasks];
+      const tasksToComplete = newTasks.filter((task) => multipleSelectedTasks.includes(task.id));
+
+      tasksToComplete.forEach((task) => {
+        if (task.recurrence) {
+          const newDeadline = new Date(task.deadline || Date.now());
+          if (task.recurrence === "daily") {
+            newDeadline.setDate(newDeadline.getDate() + 1);
+          } else if (task.recurrence === "weekly") {
+            newDeadline.setDate(newDeadline.getDate() + 7);
+          } else if (task.recurrence === "monthly") {
+            newDeadline.setMonth(newDeadline.getMonth() + 1);
+          }
+
+          const newTask: Task = {
+            ...task,
+            id: generateUUID(),
+            done: false,
+            date: new Date(),
+            deadline: newDeadline,
+          };
+          newTasks.push(newTask);
         }
-        return task;
-      }),
-    }));
-    // Clear the selected task IDs after the operation
+      });
+
+      return {
+        ...prevUser,
+        tasks: newTasks.map((task) => {
+          if (multipleSelectedTasks.includes(task.id)) {
+            return { ...task, done: true, lastSave: new Date() };
+          }
+          return task;
+        }),
+      };
+    });
     setMultipleSelectedTasks([]);
   };
 

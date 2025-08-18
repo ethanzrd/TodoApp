@@ -3,7 +3,15 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import {
+  IconButton,
+  InputAdornment,
+  Tooltip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -32,6 +40,11 @@ const AddTask = () => {
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
     [],
     "categories",
+    "sessionStorage",
+  );
+  const [recurrence, setRecurrence] = useStorageState<Task["recurrence"]>(
+    undefined,
+    "recurrence",
     "sessionStorage",
   );
 
@@ -110,6 +123,7 @@ const AddTask = () => {
       color,
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
+      recurrence,
       category: selectedCategories ? selectedCategories : [],
     };
 
@@ -232,6 +246,21 @@ const AddTask = () => {
           }}
           fontColor={getFontColor(theme.secondary)}
         />
+        <FormControl fullWidth sx={{ mt: 2, mb: 2 }}>
+          <InputLabel>Recurrence</InputLabel>
+          <Select
+            value={recurrence || ""}
+            onChange={(e) => setRecurrence(e.target.value as Task["recurrence"])}
+            label="Recurrence"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </Select>
+        </FormControl>
         <AddTaskButton
           onClick={handleAddTask}
           disabled={

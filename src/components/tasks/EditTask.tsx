@@ -9,6 +9,10 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -83,6 +87,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             emoji: editedTask.emoji || undefined,
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
+            recurrence: editedTask.recurrence || undefined,
             category: editedTask.category || undefined,
             lastSave: new Date(),
           };
@@ -269,6 +274,26 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             }}
           />
         </div>
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel>Recurrence</InputLabel>
+          <Select
+            value={editedTask?.recurrence || ""}
+            onChange={(e) =>
+              setEditedTask((prevTask) => ({
+                ...(prevTask as Task),
+                recurrence: e.target.value ? (e.target.value as Task["recurrence"]) : undefined,
+              }))
+            }
+            label="Recurrence"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
         <DialogBtn onClick={handleCancel}>Cancel</DialogBtn>
