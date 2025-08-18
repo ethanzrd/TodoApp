@@ -27,6 +27,7 @@ const AddTask = () => {
     "sessionStorage",
   );
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
+  const [recurrence, setRecurrence] = useStorageState<string>("", "recurrence", "sessionStorage");
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
@@ -111,6 +112,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      ...(recurrence ? { recurrence: recurrence as "daily" | "weekly" | "monthly" } : {}),
     };
 
     setUser((prevUser) => ({
@@ -129,7 +131,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -192,7 +202,7 @@ const AddTask = () => {
             onChange={handleDeadlineChange}
             onFocus={() => setIsDeadlineFocused(true)}
             onBlur={() => setIsDeadlineFocused(false)}
-            hidetext={(!deadline || deadline === "") && !isDeadlineFocused} // fix for label overlapping with input
+            hidetext={(!deadline || deadline === "") && !isDeadlineFocused}
             sx={{
               colorScheme: isDark(theme.secondary) ? "dark" : "light",
             }}
@@ -211,6 +221,18 @@ const AddTask = () => {
               },
             }}
           />
+          <StyledInput
+            select
+            label="Recurrence"
+            value={recurrence}
+            onChange={(e) => setRecurrence((e.target as HTMLInputElement).value)}
+            SelectProps={{ native: true }}
+          >
+            <option value="">None</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>

@@ -64,11 +64,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
-    // Update the editedTask state with the changed value.
-    setEditedTask((prevTask) => ({
-      ...(prevTask as Task),
-      [name]: value,
-    }));
+    setEditedTask((prevTask) => {
+      const next: Task = { ...(prevTask as Task) };
+      if (name === "deadline") {
+        next.deadline = value ? new Date(value) : undefined;
+      } else if (name === "name") {
+        next.name = value;
+      } else if (name === "description") {
+        next.description = value || undefined;
+      } else if (name === "recurrence") {
+        next.recurrence = value === "" ? undefined : (value as "daily" | "weekly" | "monthly");
+      }
+      return next;
+    });
   };
   // Event handler for saving the edited task.
   const handleSave = () => {
@@ -84,6 +92,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +250,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+        <StyledInput
+          label="Recurrence"
+          name="recurrence"
+          select
+          value={editedTask?.recurrence || ""}
+          onChange={handleInputChange}
+          SelectProps={{ native: true }}
+        >
+          <option value="">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

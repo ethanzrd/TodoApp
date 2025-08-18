@@ -67,21 +67,56 @@ export const TaskMenu = () => {
   };
 
   const handleMarkAsDone = () => {
-    // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+
+      const selected = tasks.find((t) => t.id === selectedTaskId);
+      const wasNotDone = selected && !selected.done;
+
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      let nextTasks = updatedTasks;
+
+      if (wasNotDone && selected && selected.recurrence && selected.deadline) {
+        const oldDeadline = new Date(selected.deadline);
+        const nextDeadline = new Date(oldDeadline);
+
+        switch (selected.recurrence) {
+          case "daily":
+            nextDeadline.setDate(nextDeadline.getDate() + 1);
+            break;
+          case "weekly":
+            nextDeadline.setDate(nextDeadline.getDate() + 7);
+            break;
+          case "monthly":
+            nextDeadline.setMonth(nextDeadline.getMonth() + 1);
+            break;
+        }
+
+        const nextOccurrence: Task = {
+          ...selected,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: nextDeadline,
+          sharedBy: undefined,
+          lastSave: new Date(),
+        };
+
+        nextTasks = [...updatedTasks, nextOccurrence];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: nextTasks,
       }));
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+      const allTasksDone = nextTasks.every((task) => task.done);
 
       if (allTasksDone) {
         showToast(
