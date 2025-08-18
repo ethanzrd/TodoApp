@@ -1,4 +1,4 @@
-import { timeAgo, formatDate, calculateDateDifference } from "../timeUtils";
+import { timeAgo, formatDate, calculateDateDifference, getNextRecurrenceDate } from "../timeUtils";
 
 describe("Date Utility Functions", () => {
   beforeEach(() => {
@@ -156,6 +156,27 @@ describe("Date Utility Functions", () => {
 
       const result = calculateDateDifference(deadline);
       expect(result).toBe("in 5 hours");
+    });
+  });
+
+  describe("getNextRecurrenceDate", () => {
+    it("should add one day for daily recurrence", () => {
+      const base = new Date("2024-01-01T00:00:00");
+      const next = getNextRecurrenceDate(base, "daily");
+      expect(next.getDate()).toBe(2);
+    });
+
+    it("should add seven days for weekly recurrence", () => {
+      const base = new Date("2024-01-01T00:00:00");
+      const next = getNextRecurrenceDate(base, "weekly");
+      expect(next.getDate()).toBe(8);
+    });
+
+    it("should add one month for monthly recurrence", () => {
+      const base = new Date("2024-01-15T00:00:00");
+      const next = getNextRecurrenceDate(base, "monthly");
+      expect(next.getMonth()).toBe(1);
+      expect(next.getDate()).toBe(15);
     });
   });
 });

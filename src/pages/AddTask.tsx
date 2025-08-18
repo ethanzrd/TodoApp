@@ -1,4 +1,4 @@
-import { Category, Task } from "../types/user";
+import { Category, Task, Recurrence } from "../types/user";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
@@ -27,6 +27,11 @@ const AddTask = () => {
     "sessionStorage",
   );
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
+  const [recurrence, setRecurrence] = useStorageState<Recurrence | "none">(
+    "none",
+    "recurrence",
+    "sessionStorage",
+  );
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
@@ -111,6 +116,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence !== "none" ? recurrence : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +135,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +225,19 @@ const AddTask = () => {
               },
             }}
           />
+          <StyledInput
+            label="Recurrence"
+            name="recurrence"
+            select
+            value={recurrence}
+            onChange={(e) => setRecurrence(e.target.value as Recurrence | "none")}
+            SelectProps={{ native: true }}
+          >
+            <option value="none">None</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>

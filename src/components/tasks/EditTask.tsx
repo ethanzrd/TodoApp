@@ -67,7 +67,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     // Update the editedTask state with the changed value.
     setEditedTask((prevTask) => ({
       ...(prevTask as Task),
-      [name]: value,
+      [name]: name === "recurrence" && value === "none" ? undefined : value,
     }));
   };
   // Event handler for saving the edited task.
@@ -84,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +242,20 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <StyledInput
+          label="Recurrence"
+          name="recurrence"
+          select
+          value={editedTask?.recurrence || "none"}
+          onChange={handleInputChange}
+          SelectProps={{ native: true }}
+        >
+          <option value="none">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect
