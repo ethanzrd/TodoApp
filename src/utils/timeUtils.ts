@@ -1,3 +1,26 @@
+export const computeNextDueDate = (
+  recurrence: "daily" | "weekly" | "monthly",
+  from?: Date,
+): Date => {
+  const base = from ? new Date(from) : new Date();
+  if (recurrence === "daily") {
+    const d = new Date(base);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }
+  if (recurrence === "weekly") {
+    const d = new Date(base);
+    d.setDate(d.getDate() + 7);
+    return d;
+  }
+  const d = new Date(base);
+  const originalDay = d.getDate();
+  d.setMonth(d.getMonth() + 1);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(originalDay, lastDay));
+  return d;
+};
+
 const MS_IN_MINUTE = 60 * 1000;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 const MS_IN_DAY = 24 * MS_IN_HOUR;

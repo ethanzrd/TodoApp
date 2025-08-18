@@ -29,7 +29,8 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { getFontColor, showToast, generateUUID } from "../../utils";
+import { computeNextDueDate } from "../../utils/timeUtils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,17 +268,44 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
+    setUser((prevUser) => {
+      const now = new Date();
+      const nextTasks: Task[] = [];
+      const updated = prevUser.tasks.map((task) => {
         if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
-          return { ...task, done: true, lastSave: new Date() };
+          const wasDone = task.done;
+          const updatedTask = { ...task, done: true, lastSave: new Date() };
+          if (
+            !wasDone &&
+            task.recurrence &&
+            (task.recurrence === "daily" ||
+              task.recurrence === "weekly" ||
+              task.recurrence === "monthly")
+          ) {
+            const nextDeadline = computeNextDueDate(
+              task.recurrence,
+              task.deadline ? new Date(task.deadline) : now,
+            );
+            nextTasks.push({
+              id: generateUUID(),
+              done: false,
+              pinned: task.pinned,
+              name: task.name,
+              description: task.description,
+              emoji: task.emoji,
+              color: task.color,
+              date: new Date(),
+              deadline: nextDeadline,
+              category: task.category,
+              recurrence: task.recurrence,
+            });
+          }
+          return updatedTask;
         }
         return task;
-      }),
-    }));
-    // Clear the selected task IDs after the operation
+      });
+      return { ...prevUser, tasks: [...updated, ...nextTasks] };
+    });
     setMultipleSelectedTasks([]);
   };
 

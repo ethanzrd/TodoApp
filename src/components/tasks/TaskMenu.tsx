@@ -28,6 +28,7 @@ import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
 import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { computeNextDueDate } from "../../utils/timeUtils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -67,15 +68,44 @@ export const TaskMenu = () => {
   };
 
   const handleMarkAsDone = () => {
-    // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+      const selected = tasks.find((t) => t.id === selectedTaskId);
+      let updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      if (
+        selected &&
+        !selected.done &&
+        selected.recurrence &&
+        (selected.recurrence === "daily" ||
+          selected.recurrence === "weekly" ||
+          selected.recurrence === "monthly")
+      ) {
+        const nextDeadline = computeNextDueDate(
+          selected.recurrence,
+          selected.deadline ? new Date(selected.deadline) : new Date(),
+        );
+        const nextTask: Task = {
+          id: generateUUID(),
+          done: false,
+          pinned: selected.pinned,
+          name: selected.name,
+          description: selected.description,
+          emoji: selected.emoji,
+          color: selected.color,
+          date: new Date(),
+          deadline: nextDeadline,
+          category: selected.category,
+          recurrence: selected.recurrence,
+        };
+        updatedTasks = [...updatedTasks, nextTask];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,
