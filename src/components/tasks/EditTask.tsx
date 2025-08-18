@@ -84,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || "none",
             lastSave: new Date(),
           };
         }
@@ -249,6 +250,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             onCategoryChange={(categories) => setSelectedCategories(categories)}
           />
         )}
+        <StyledInput
+          label="Recurrence"
+          name="recurrence"
+          select
+          value={editedTask?.recurrence || "none"}
+          onChange={handleInputChange}
+          SelectProps={{ native: true }}
+        >
+          <option value="none">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
         <div
           style={{
             display: "flex",

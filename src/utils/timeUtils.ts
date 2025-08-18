@@ -117,3 +117,30 @@ export const calculateDateDifference = (
   // beyond 7 days
   return rtf.format(dayDiff, "day");
 };
+
+export const addDays = (date: Date, days: number): Date => {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+export const addWeeks = (date: Date, weeks: number): Date => addDays(date, weeks * 7);
+export const addMonths = (date: Date, months: number): Date => {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + months);
+  return d;
+};
+export const shiftByRecurrence = (
+  deadline: Date,
+  recurrence: "daily" | "weekly" | "monthly",
+): Date => {
+  switch (recurrence) {
+    case "daily":
+      return addDays(deadline, 1);
+    case "weekly":
+      return addWeeks(deadline, 1);
+    case "monthly":
+      return addMonths(deadline, 1);
+    default:
+      return deadline;
+  }
+};

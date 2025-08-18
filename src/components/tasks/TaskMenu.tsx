@@ -28,6 +28,7 @@ import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
 import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { shiftByRecurrence } from "../../utils/timeUtils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -67,21 +68,33 @@ export const TaskMenu = () => {
   };
 
   const handleMarkAsDone = () => {
-    // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      let nextTask: Task | null = null;
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
-          return { ...task, done: !task.done, lastSave: new Date() };
+          const newDone = !task.done;
+          if (newDone && task.recurrence && task.recurrence !== "none" && task.deadline) {
+            nextTask = {
+              ...task,
+              id: generateUUID(),
+              done: false,
+              date: new Date(),
+              deadline: shiftByRecurrence(new Date(task.deadline), task.recurrence),
+              lastSave: undefined,
+            };
+          }
+          return { ...task, done: newDone, lastSave: new Date() };
         }
         return task;
       });
+      const finalTasks = nextTask ? [...updatedTasks, nextTask] : updatedTasks;
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: finalTasks,
       }));
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+      const allTasksDone = finalTasks.every((task) => task.done);
 
       if (allTasksDone) {
         showToast(
