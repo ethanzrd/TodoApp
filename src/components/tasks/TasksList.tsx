@@ -267,17 +267,39 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
+    setUser((prevUser) => {
+      const newTasks: Task[] = [];
+      for (const task of prevUser.tasks) {
         if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
-          return { ...task, done: true, lastSave: new Date() };
+          const wasDone = task.done;
+          const updatedTask: Task = { ...task, done: true, lastSave: new Date() };
+          newTasks.push(updatedTask);
+          if (!wasDone && task.recurrence) {
+            const baseDate = task.deadline ? new Date(task.deadline) : new Date();
+            const nextDeadline = new Date(baseDate);
+            if (task.recurrence === "daily") {
+              nextDeadline.setDate(nextDeadline.getDate() + 1);
+            } else if (task.recurrence === "weekly") {
+              nextDeadline.setDate(nextDeadline.getDate() + 7);
+            } else if (task.recurrence === "monthly") {
+              nextDeadline.setMonth(nextDeadline.getMonth() + 1);
+            }
+            const nextTask: Task = {
+              ...task,
+              id: generateUUID(),
+              done: false,
+              date: new Date(),
+              deadline: nextDeadline,
+              lastSave: undefined,
+            };
+            newTasks.push(nextTask);
+          }
+        } else {
+          newTasks.push(task);
         }
-        return task;
-      }),
-    }));
-    // Clear the selected task IDs after the operation
+      }
+      return { ...prevUser, tasks: newTasks };
+    });
     setMultipleSelectedTasks([]);
   };
 

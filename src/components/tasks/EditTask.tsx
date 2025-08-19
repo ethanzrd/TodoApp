@@ -9,6 +9,10 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -84,6 +88,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +246,27 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel id="edit-recurrence-label">Recurrence</InputLabel>
+          <Select
+            labelId="edit-recurrence-label"
+            id="edit-recurrence"
+            value={editedTask?.recurrence || "none"}
+            label="Recurrence"
+            onChange={(e) => {
+              const value = e.target.value as "none" | "daily" | "weekly" | "monthly";
+              setEditedTask((prevTask) => ({
+                ...(prevTask as Task),
+                recurrence: value === "none" ? undefined : value,
+              }));
+            }}
+          >
+            <MenuItem value="none">None</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </Select>
+        </FormControl>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

@@ -3,7 +3,15 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import {
+  IconButton,
+  InputAdornment,
+  Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -36,6 +44,11 @@ const AddTask = () => {
   );
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
+  const [recurrence, setRecurrence] = useStorageState<string>(
+    "none",
+    "recurrence",
+    "sessionStorage",
+  );
 
   const n = useNavigate();
   const { toasts } = useToasterStore();
@@ -111,6 +124,8 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence:
+        recurrence !== "none" ? (recurrence as "daily" | "weekly" | "monthly") : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +144,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -224,6 +247,22 @@ const AddTask = () => {
             </div>
           )}
         </InputThemeProvider>
+        <FormControl fullWidth sx={{ mt: 2, mb: 1 }}>
+          <InputLabel id="recurrence-label">Recurrence</InputLabel>
+          <Select
+            labelId="recurrence-label"
+            id="recurrence"
+            value={recurrence}
+            label="Recurrence"
+            onChange={(e) => setRecurrence(e.target.value)}
+          >
+            <MenuItem value="none">None</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </Select>
+        </FormControl>
+
         <ColorPicker
           color={color}
           width="400px"

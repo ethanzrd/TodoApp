@@ -67,15 +67,38 @@ export const TaskMenu = () => {
   };
 
   const handleMarkAsDone = () => {
-    // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+      const original = tasks.find((t) => t.id === selectedTaskId);
+      const wasDone = original?.done;
+      let updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      if (original && !wasDone && original.recurrence) {
+        const baseDate = original.deadline ? new Date(original.deadline) : new Date();
+        const nextDeadline = new Date(baseDate);
+        if (original.recurrence === "daily") {
+          nextDeadline.setDate(nextDeadline.getDate() + 1);
+        } else if (original.recurrence === "weekly") {
+          nextDeadline.setDate(nextDeadline.getDate() + 7);
+        } else if (original.recurrence === "monthly") {
+          nextDeadline.setMonth(nextDeadline.getMonth() + 1);
+        }
+        const nextTask: Task = {
+          ...original,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: original.deadline ? nextDeadline : nextDeadline,
+          lastSave: undefined,
+        };
+        updatedTasks = [...updatedTasks, nextTask];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,
