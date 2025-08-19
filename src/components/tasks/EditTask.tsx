@@ -84,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +242,36 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+        <StyledInput
+          select
+          label="Recurrence"
+          name="recurrence"
+          value={editedTask?.recurrence ?? "none"}
+          onChange={(e) => {
+            const val = e.target.value as "none" | "daily" | "weekly" | "monthly";
+            setEditedTask((prev) => ({
+              ...(prev as Task),
+              recurrence: val === "none" ? undefined : (val as "daily" | "weekly" | "monthly"),
+            }));
+          }}
+          helperText={
+            editedTask?.recurrence && !editedTask?.deadline
+              ? "Set a deadline for recurring tasks"
+              : undefined
+          }
+          error={Boolean(editedTask?.recurrence && !editedTask?.deadline)}
+          SelectProps={{ native: true }}
+          sx={{
+            " & .MuiInputBase-root": {
+              transition: ".3s all",
+            },
+          }}
+        >
+          <option value="none">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

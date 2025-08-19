@@ -117,3 +117,34 @@ export const calculateDateDifference = (
   // beyond 7 days
   return rtf.format(dayDiff, "day");
 };
+
+export function getNextOccurrenceDate(
+  recurrence: "daily" | "weekly" | "monthly",
+  from: Date,
+): Date {
+  const base = new Date(from);
+  if (recurrence === "daily") {
+    base.setDate(base.getDate() + 1);
+    return base;
+  }
+  if (recurrence === "weekly") {
+    base.setDate(base.getDate() + 7);
+    return base;
+  }
+  const hours = base.getHours();
+  const minutes = base.getMinutes();
+  const seconds = base.getSeconds();
+  const ms = base.getMilliseconds();
+  const year = base.getFullYear();
+  const month = base.getMonth();
+  const day = base.getDate();
+  const nextMonthStart = new Date(year, month + 1, 1, hours, minutes, seconds, ms);
+  const lastDayOfNextMonth = new Date(
+    nextMonthStart.getFullYear(),
+    nextMonthStart.getMonth() + 1,
+    0,
+  );
+  const targetDay = Math.min(day, lastDayOfNextMonth.getDate());
+  nextMonthStart.setDate(targetDay);
+  return nextMonthStart;
+}

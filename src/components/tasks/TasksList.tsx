@@ -29,7 +29,8 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { getFontColor, showToast, generateUUID } from "../../utils";
+import { getNextOccurrenceDate } from "../../utils/timeUtils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,17 +268,30 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
+    const selectedSet = new Set(multipleSelectedTasks);
+    const marked = user.tasks.map((task) =>
+      selectedSet.has(task.id) ? { ...task, done: true, lastSave: new Date() } : task,
+    );
+    const spawned: Task[] = user.tasks
+      .filter((t) => selectedSet.has(t.id) && t.recurrence && t.deadline)
+      .map((t) => {
+        const nextDeadline = getNextOccurrenceDate(
+          t.recurrence as "daily" | "weekly" | "monthly",
+          new Date(t.deadline as Date),
+        );
+        return {
+          ...t,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: nextDeadline,
+          lastSave: undefined,
+        } as Task;
+      });
     setUser((prevUser) => ({
       ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
-        if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
-          return { ...task, done: true, lastSave: new Date() };
-        }
-        return task;
-      }),
+      tasks: [...marked, ...spawned],
     }));
-    // Clear the selected task IDs after the operation
     setMultipleSelectedTasks([]);
   };
 

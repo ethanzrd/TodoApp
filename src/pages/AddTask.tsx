@@ -27,6 +27,11 @@ const AddTask = () => {
     "sessionStorage",
   );
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
+  const [recurrence, setRecurrence] = useStorageState<"none" | "daily" | "weekly" | "monthly">(
+    "none",
+    "recurrence",
+    "sessionStorage",
+  );
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
@@ -111,6 +116,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      ...(recurrence !== "none" ? { recurrence } : {}),
     };
 
     setUser((prevUser) => ({
@@ -129,7 +135,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +225,28 @@ const AddTask = () => {
               },
             }}
           />
+          <StyledInput
+            select
+            label="Recurrence"
+            name="recurrence"
+            value={recurrence}
+            onChange={(e) =>
+              setRecurrence(e.target.value as "none" | "daily" | "weekly" | "monthly")
+            }
+            SelectProps={{ native: true }}
+            error={recurrence !== "none" && (!deadline || deadline === "")}
+            helperText={
+              recurrence !== "none" && (!deadline || deadline === "")
+                ? "Set a deadline for recurring tasks"
+                : undefined
+            }
+            sx={{ mt: 1 }}
+          >
+            <option value="none">None</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>
@@ -235,7 +271,9 @@ const AddTask = () => {
         <AddTaskButton
           onClick={handleAddTask}
           disabled={
-            name.length > TASK_NAME_MAX_LENGTH || description.length > DESCRIPTION_MAX_LENGTH
+            name.length > TASK_NAME_MAX_LENGTH ||
+            description.length > DESCRIPTION_MAX_LENGTH ||
+            (recurrence !== "none" && (!deadline || deadline === ""))
           }
         >
           Create Task
