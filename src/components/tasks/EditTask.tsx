@@ -84,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +242,30 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+        <StyledInput
+          label="Recurrence"
+          name="recurrence"
+          select
+          SelectProps={{ native: true }}
+          value={editedTask?.recurrence || ""}
+          onChange={handleInputChange}
+          slotProps={{
+            inputLabel: {
+              shrink: true,
+            },
+          }}
+          sx={{
+            colorScheme: theme.darkmode ? "dark" : "light",
+            " & .MuiInputBase-root": {
+              transition: ".3s all",
+            },
+          }}
+        >
+          <option value="">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect
