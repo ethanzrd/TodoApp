@@ -1,3 +1,7 @@
+## 👋 Welcome
+
+Thanks for checking out this project!
+
 <!-- <p align="center">
 <img src="https://raw.githubusercontent.com/maciekt07/TodoApp/main/public/logo192.png" width="128px" />
 </p> -->
