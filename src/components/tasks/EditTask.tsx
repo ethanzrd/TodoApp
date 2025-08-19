@@ -84,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +242,29 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+        <StyledInput
+          select
+          label="Recurrence"
+          name="recurrence"
+          value={editedTask?.recurrence || ""}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const val = e.target.value as "" | "daily" | "weekly" | "monthly";
+            setEditedTask((prevTask) => ({
+              ...(prevTask as Task),
+              recurrence: val === "" ? undefined : val,
+            }));
+          }}
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
+          SelectProps={{ native: true }}
+          sx={{ mt: 1 }}
+        >
+          <option value=""></option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect
