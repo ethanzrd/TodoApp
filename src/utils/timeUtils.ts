@@ -117,3 +117,24 @@ export const calculateDateDifference = (
   // beyond 7 days
   return rtf.format(dayDiff, "day");
 };
+
+import type { Recurrence } from "../types/user";
+
+export const shiftDateByRecurrence = (date: Date, recurrence: Recurrence): Date => {
+  const d = new Date(date);
+  switch (recurrence) {
+    case "daily":
+      d.setDate(d.getDate() + 1);
+      break;
+    case "weekly":
+      d.setDate(d.getDate() + 7);
+      break;
+    case "monthly":
+      d.setMonth(d.getMonth() + 1);
+      break;
+    default:
+      // 'none' or unknown value – no change
+      break;
+  }
+  return d;
+};

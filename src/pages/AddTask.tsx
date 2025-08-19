@@ -14,6 +14,8 @@ import { ColorPalette } from "../theme/themeConfig";
 import InputThemeProvider from "../contexts/InputThemeProvider";
 import { CategorySelect } from "../components/CategorySelect";
 import { useToasterStore } from "react-hot-toast";
+import type { Recurrence } from "../types/user";
+import { MenuItem } from "@mui/material";
 
 const AddTask = () => {
   const { user, setUser } = useContext(UserContext);
@@ -32,6 +34,11 @@ const AddTask = () => {
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
     [],
     "categories",
+    "sessionStorage",
+  );
+  const [recurrence, setRecurrence] = useStorageState<Recurrence>(
+    "none",
+    "recurrence",
     "sessionStorage",
   );
 
@@ -111,6 +118,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence,
     };
 
     setUser((prevUser) => ({
@@ -130,7 +138,7 @@ const AddTask = () => {
     );
 
     const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
-    itemsToRemove.map((item) => sessionStorage.removeItem(item));
+    itemsToRemove.concat("recurrence").map((item) => sessionStorage.removeItem(item));
   };
 
   return (
@@ -211,6 +219,20 @@ const AddTask = () => {
               },
             }}
           />
+
+          <StyledInput
+            label="Recurrence"
+            select
+            value={recurrence}
+            onChange={(e) => setRecurrence(e.target.value as Recurrence)}
+            helperText="Choose how often this task repeats"
+            sx={{ width: "400px" }}
+          >
+            <MenuItem value="none">None</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>

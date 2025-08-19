@@ -27,7 +27,12 @@ import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
-import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import {
+  calculateDateDifference,
+  generateUUID,
+  showToast,
+  shiftDateByRecurrence,
+} from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -76,6 +81,27 @@ export const TaskMenu = () => {
         }
         return task;
       });
+
+      const originalTask = tasks.find((t) => t.id === selectedTaskId);
+      if (
+        originalTask &&
+        !originalTask.done &&
+        originalTask.recurrence &&
+        originalTask.recurrence !== "none"
+      ) {
+        const nextTask: Task = {
+          ...originalTask,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: originalTask.deadline
+            ? shiftDateByRecurrence(new Date(originalTask.deadline), originalTask.recurrence)
+            : undefined,
+          lastSave: undefined,
+        };
+        updatedTasks.push(nextTask);
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,

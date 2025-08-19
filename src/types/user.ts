@@ -50,6 +50,11 @@ export interface Task {
    */
   date: Date;
   deadline?: Date;
+  /**
+   * Recurrence interval for the task.
+   * "none" (default) means the task does not repeat.
+   */
+  recurrence?: Recurrence;
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
@@ -58,6 +63,11 @@ export interface Task {
    */
   position?: number;
 }
+
+/**
+ * Supported recurrence intervals for tasks.
+ */
+export type Recurrence = "none" | "daily" | "weekly" | "monthly";
 
 /**
  * Represents a category in the application.
