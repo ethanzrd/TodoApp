@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip, MenuItem } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -32,6 +32,11 @@ const AddTask = () => {
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
     [],
     "categories",
+    "sessionStorage",
+  );
+  const [recurrence, setRecurrence] = useStorageState<string>(
+    "none",
+    "recurrence",
     "sessionStorage",
   );
 
@@ -111,6 +116,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence !== "none" ? (recurrence as Task["recurrence"]) : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +135,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -213,15 +227,29 @@ const AddTask = () => {
           />
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
-            <div style={{ marginBottom: "14px" }}>
-              <br />
-              <CategorySelect
-                selectedCategories={selectedCategories}
-                onCategoryChange={(categories) => setSelectedCategories(categories)}
-                width="400px"
-                fontColor={getFontColor(theme.secondary)}
-              />
-            </div>
+            <>
+              <div style={{ marginBottom: "14px" }}>
+                <br />
+                <CategorySelect
+                  selectedCategories={selectedCategories}
+                  onCategoryChange={(categories) => setSelectedCategories(categories)}
+                  width="400px"
+                  fontColor={getFontColor(theme.secondary)}
+                />
+              </div>
+              <StyledInput
+                label="Recurrence"
+                name="recurrence"
+                select
+                value={recurrence}
+                onChange={(e) => setRecurrence(e.target.value)}
+              >
+                <MenuItem value="none">None</MenuItem>
+                <MenuItem value="daily">Daily</MenuItem>
+                <MenuItem value="weekly">Weekly</MenuItem>
+                <MenuItem value="monthly">Monthly</MenuItem>
+              </StyledInput>
+            </>
           )}
         </InputThemeProvider>
         <ColorPicker

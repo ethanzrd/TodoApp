@@ -33,6 +33,7 @@ import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
 import { ShareDialog } from "./ShareDialog";
 import { usePrefersReducedMotion } from "../../hooks/usePrefersReducedMotion";
+import { addDays, addWeeks, addMonths } from "../../utils/timeUtils";
 
 export const TaskMenu = () => {
   const { user, setUser } = useContext(UserContext);
@@ -67,21 +68,48 @@ export const TaskMenu = () => {
   };
 
   const handleMarkAsDone = () => {
-    // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      const wasDone = selectedTask?.done;
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      let finalTasks = updatedTasks;
+
+      if (!wasDone && selectedTask?.recurrence && selectedTask?.deadline) {
+        const shift = (date: Date): Date => {
+          switch (selectedTask.recurrence) {
+            case "daily":
+              return addDays(date, 1);
+            case "weekly":
+              return addWeeks(date, 1);
+            case "monthly":
+              return addMonths(date, 1);
+            default:
+              return date;
+          }
+        };
+        const nextTask: Task = {
+          ...selectedTask,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: shift(new Date(selectedTask.deadline)),
+          lastSave: undefined,
+        };
+        finalTasks = [...updatedTasks, nextTask];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: finalTasks,
       }));
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+      const allTasksDone = finalTasks.every((task) => task.done);
 
       if (allTasksDone) {
         showToast(

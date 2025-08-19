@@ -29,7 +29,8 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { getFontColor, showToast, generateUUID } from "../../utils";
+import { addDays, addWeeks, addMonths } from "../../utils/timeUtils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,17 +268,50 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
+    setUser((prevUser) => {
+      const toggled = prevUser.tasks.map((task) => {
         if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
           return { ...task, done: true, lastSave: new Date() };
         }
         return task;
-      }),
-    }));
-    // Clear the selected task IDs after the operation
+      });
+
+      const additional: Task[] = prevUser.tasks
+        .filter(
+          (task) =>
+            multipleSelectedTasks.includes(task.id) &&
+            !task.done &&
+            task.recurrence &&
+            task.deadline,
+        )
+        .map((task) => {
+          const shift = (date: Date): Date => {
+            switch (task.recurrence) {
+              case "daily":
+                return addDays(date, 1);
+              case "weekly":
+                return addWeeks(date, 1);
+              case "monthly":
+                return addMonths(date, 1);
+              default:
+                return date;
+            }
+          };
+          return {
+            ...task,
+            id: generateUUID(),
+            done: false,
+            date: new Date(),
+            deadline: shift(new Date(task.deadline as Date)),
+            lastSave: undefined,
+          };
+        });
+
+      return {
+        ...prevUser,
+        tasks: [...toggled, ...additional],
+      };
+    });
     setMultipleSelectedTasks([]);
   };
 
