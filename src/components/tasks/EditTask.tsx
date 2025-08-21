@@ -6,6 +6,7 @@ import {
   DialogContent,
   IconButton,
   InputAdornment,
+  MenuItem,
   TextField,
   TextFieldProps,
   Tooltip,
@@ -33,6 +34,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const [editedTask, setEditedTask] = useState<Task | undefined>(task);
   const [emoji, setEmoji] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [recurrence, setRecurrence] = useState<string>("none");
 
   const theme = useTheme();
 
@@ -58,6 +60,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   useEffect(() => {
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
+    setRecurrence(task?.recurrence || "none");
   }, [task]);
 
   // Event handler for input changes in the form fields.
@@ -83,6 +86,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             emoji: editedTask.emoji || undefined,
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
+            recurrence: recurrence === "none" ? undefined : (recurrence as Task["recurrence"]),
             category: editedTask.category || undefined,
             lastSave: new Date(),
           };
@@ -106,6 +110,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     onClose();
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
+    setRecurrence(task?.recurrence || "none");
   };
 
   useEffect(() => {
@@ -117,7 +122,9 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (JSON.stringify(editedTask) !== JSON.stringify(task) && open) {
+      const current = { ...editedTask, recurrence };
+      const original = { ...task, recurrence: task?.recurrence };
+      if (JSON.stringify(current) !== JSON.stringify(original) && open) {
         const message = "You have unsaved changes. Are you sure you want to leave?";
         e.returnValue = message;
         return message;
@@ -129,7 +136,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [editedTask, open, task]);
+  }, [editedTask, open, task, recurrence]);
 
   return (
     <Dialog
@@ -241,6 +248,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <StyledInput
+          select
+          label="Recurrence"
+          value={recurrence}
+          onChange={(e) => setRecurrence(e.target.value)}
+          sx={{ mt: 2 }}
+        >
+          <MenuItem value="none">None</MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

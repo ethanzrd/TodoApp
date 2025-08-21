@@ -27,7 +27,7 @@ import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
-import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { calculateDateDifference, generateUUID, getNextDueDate, showToast } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,11 +70,27 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+      const updatedTasks: Task[] = [];
+      tasks.forEach((task) => {
         if (task.id === selectedTaskId) {
-          return { ...task, done: !task.done, lastSave: new Date() };
+          const wasDone = task.done;
+          const toggled = { ...task, done: !task.done, lastSave: new Date() };
+          updatedTasks.push(toggled);
+          if (!wasDone && task.recurrence) {
+            updatedTasks.push({
+              ...task,
+              id: generateUUID(),
+              done: false,
+              date: new Date(),
+              deadline: task.deadline
+                ? getNextDueDate(new Date(task.deadline), task.recurrence)
+                : undefined,
+              lastSave: new Date(),
+            });
+          }
+        } else {
+          updatedTasks.push(task);
         }
-        return task;
       });
       setUser((prevUser) => ({
         ...prevUser,
