@@ -66,6 +66,7 @@ export const TaskMenu = () => {
     n(`/task/${taskId}`);
   };
 
+  // Non-breaking change: Logic added to support recurring tasks
   const handleMarkAsDone = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {

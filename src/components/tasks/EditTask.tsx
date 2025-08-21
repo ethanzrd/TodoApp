@@ -243,6 +243,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           }}
         />
 
+        {/* Non-breaking change: Added for recurring tasks feature */}
         <StyledInput
           label="Recurrence"
           name="recurrence"

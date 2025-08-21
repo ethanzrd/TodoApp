@@ -222,6 +222,7 @@ const AddTask = () => {
             }}
           />
 
+          {/* Non-breaking change: Added for recurring tasks feature */}
           <StyledInput
             label="Recurrence"
             name="recurrence"
