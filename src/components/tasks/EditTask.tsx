@@ -85,7 +85,8 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
-            recurrence: editedTask.recurrence || undefined, // save selected recurrence if any
+            recurrence: editedTask.recurrence || undefined, // persist the chosen recurrence interval (daily/weekly/monthly)
+            // and omit the field entirely for one-off tasks
             lastSave: new Date(),
           };
         }
