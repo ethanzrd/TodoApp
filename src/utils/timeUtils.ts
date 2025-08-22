@@ -117,3 +117,29 @@ export const calculateDateDifference = (
   // beyond 7 days
   return rtf.format(dayDiff, "day");
 };
+
+/**
+ * Returns the next date for a given recurrence based on a base date.
+ * Keeps the same time component.
+ */
+export const getNextRecurrenceDate = (
+  baseDate: Date,
+  recurrence: "daily" | "weekly" | "monthly",
+): Date => {
+  const next = new Date(baseDate);
+  if (recurrence === "daily") {
+    next.setDate(next.getDate() + 1);
+  } else if (recurrence === "weekly") {
+    next.setDate(next.getDate() + 7);
+  } else {
+    // monthly
+    const day = next.getDate();
+    next.setMonth(next.getMonth() + 1);
+    // handle cases where month rollover trimmed the day (e.g., Jan 31 -> Feb 28/29)
+    if (next.getDate() < day) {
+      // set to last day of previous month (already rolled)
+      next.setDate(0);
+    }
+  }
+  return next;
+};
