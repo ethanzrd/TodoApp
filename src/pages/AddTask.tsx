@@ -27,6 +27,11 @@ const AddTask = () => {
     "sessionStorage",
   );
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
+  const [recurrence, setRecurrence] = useStorageState<"" | "daily" | "weekly" | "monthly">(
+    "",
+    "recurrence",
+    "sessionStorage",
+  );
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
@@ -85,6 +90,11 @@ const AddTask = () => {
     setDeadline(event.target.value);
   };
 
+  const handleRecurrenceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value as "" | "daily" | "weekly" | "monthly";
+    setRecurrence(value);
+  };
+
   const handleAddTask = () => {
     if (name === "") {
       showToast("Task name is required.", {
@@ -111,6 +121,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence || undefined,
     };
 
     setUser((prevUser) => ({
@@ -131,6 +142,7 @@ const AddTask = () => {
 
     const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
+    sessionStorage.removeItem("recurrence");
   };
 
   return (
@@ -183,6 +195,21 @@ const AddTask = () => {
                   : descriptionError
             }
           />
+          <StyledInput
+            select
+            label="Recurrence"
+            name="recurrence"
+            placeholder="Select recurrence"
+            value={recurrence}
+            onChange={handleRecurrenceChange}
+            SelectProps={{ native: true }}
+          >
+            <option value="">None</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </StyledInput>
+
           <StyledInput
             label="Task Deadline"
             name="name"
