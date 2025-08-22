@@ -26,13 +26,8 @@ import "react-spring-bottom-sheet/dist/style.css";
 import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
-import { Task } from "../../types/user";
-import {
-  calculateDateDifference,
-  generateUUID,
-  showToast,
-  addInterval,
-} from "../../utils";
+import { Task, Recurrence } from "../../types/user";
+import { calculateDateDifference, generateUUID, showToast } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -75,20 +70,38 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks: Task[] = tasks.map((task) => {
+
+      // store previous done state to know if we are completing now
+      const wasDone = selectedTask.done;
+      let updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
 
-      // If the task is being marked as done *now* and it is recurring, create next occurrence
-      if (!selectedTask.done && selectedTask.recurrence) {
-        const nextDeadline =
-          selectedTask.deadline !== undefined
-            ? addInterval(new Date(selectedTask.deadline), selectedTask.recurrence)
-            : undefined;
-
+      // if task is getting marked as done and it is recurring, create next occurrence
+      if (
+        !wasDone &&
+        selectedTask.recurrence &&
+        selectedTask.recurrence !== "none"
+      ) {
+        let nextDeadline: Date | undefined = undefined;
+        if (selectedTask.deadline) {
+          const d = new Date(selectedTask.deadline);
+          switch (selectedTask.recurrence as Recurrence) {
+            case "daily":
+              d.setDate(d.getDate() + 1);
+              break;
+            case "weekly":
+              d.setDate(d.getDate() + 7);
+              break;
+            case "monthly":
+              d.setMonth(d.getMonth() + 1);
+              break;
+          }
+          nextDeadline = d;
+        }
         const nextTask: Task = {
           ...selectedTask,
           id: generateUUID(),
@@ -96,7 +109,6 @@ export const TaskMenu = () => {
           date: new Date(),
           deadline: nextDeadline,
           lastSave: undefined,
-          position: undefined,
         };
         updatedTasks.push(nextTask);
       }

@@ -8,11 +8,6 @@ export type UUID = ReturnType<typeof crypto.randomUUID>;
 export type DarkModeOptions = "system" | "auto" | "light" | "dark";
 
 /**
- * Allowed recurrence intervals for recurring tasks.
- */
-export type Recurrence = "daily" | "weekly" | "monthly";
-
-/**
  * Represents a user in the application.
  */
 export interface User {
@@ -56,8 +51,7 @@ export interface Task {
   date: Date;
   deadline?: Date;
   /**
-   * Recurrence rule for automatically creating the next occurrence
-   * when the current task is completed.
+   * Recurrence pattern for the task. If omitted or 'none', the task does not recur.
    */
   recurrence?: Recurrence;
   category?: Category[];
@@ -103,3 +97,5 @@ export interface AppSettings {
 
 export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom";
 export type ReduceMotionOption = "system" | "on" | "off";
+
+export type Recurrence = 'none' | 'daily' | 'weekly' | 'monthly';
