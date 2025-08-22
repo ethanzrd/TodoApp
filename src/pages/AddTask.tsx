@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip, MenuItem } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip, Select, MenuItem } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -27,11 +27,6 @@ const AddTask = () => {
     "sessionStorage",
   );
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
-  const [recurrence, setRecurrence] = useStorageState<string>(
-    "none",
-    "recurrence",
-    "sessionStorage",
-  );
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
@@ -39,6 +34,9 @@ const AddTask = () => {
     "categories",
     "sessionStorage",
   );
+  const [recurrence, setRecurrence] = useStorageState<
+    "none" | "daily" | "weekly" | "monthly"
+  >("none", "recurrence", "sessionStorage");
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
 
@@ -90,10 +88,6 @@ const AddTask = () => {
     setDeadline(event.target.value);
   };
 
-  const handleRecurrenceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRecurrence(event.target.value);
-  };
-
   const handleAddTask = () => {
     if (name === "") {
       showToast("Task name is required.", {
@@ -120,7 +114,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
-      recurrence: recurrence !== "none" ? (recurrence as any) : undefined,
+      ...(recurrence !== "none" ? { recurrence } : {}),
     };
 
     setUser((prevUser) => ({
@@ -139,15 +133,7 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = [
-      "name",
-      "color",
-      "description",
-      "emoji",
-      "deadline",
-      "categories",
-      "recurrence",
-    ];
+    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -230,20 +216,6 @@ const AddTask = () => {
             }}
           />
 
-          {/* Recurrence selector */}
-          <StyledInput
-            label="Recurrence"
-            select
-            value={recurrence}
-            onChange={handleRecurrenceChange}
-            sx={{ width: "400px" }}
-          >
-            <MenuItem value="none">None</MenuItem>
-            <MenuItem value="daily">Daily</MenuItem>
-            <MenuItem value="weekly">Weekly</MenuItem>
-            <MenuItem value="monthly">Monthly</MenuItem>
-          </StyledInput>
-
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>
               <br />
@@ -256,6 +228,29 @@ const AddTask = () => {
             </div>
           )}
         </InputThemeProvider>
+
+        {/* Recurrence selector */}
+        <InputThemeProvider>
+          <div style={{ marginBottom: "14px", width: "400px" }}>
+            <Select
+              fullWidth
+              value={recurrence}
+              onChange={(e) => setRecurrence(e.target.value as typeof recurrence)}
+              displayEmpty
+              sx={{
+                borderRadius: "16px",
+                background: theme.secondary,
+                color: getFontColor(theme.secondary),
+              }}
+            >
+              <MenuItem value="none">None</MenuItem>
+              <MenuItem value="daily">Daily</MenuItem>
+              <MenuItem value="weekly">Weekly</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+            </Select>
+          </div>
+        </InputThemeProvider>
+
         <ColorPicker
           color={color}
           width="400px"

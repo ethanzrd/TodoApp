@@ -30,8 +30,8 @@ import { Task } from "../../types/user";
 import {
   calculateDateDifference,
   generateUUID,
-  getNextOccurrenceDate,
   showToast,
+  addInterval,
 } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
@@ -75,40 +75,35 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const newOccurrences: Task[] = [];
-      const updatedTasks = tasks.map((task) => {
+      const updatedTasks: Task[] = tasks.map((task) => {
         if (task.id === selectedTaskId) {
-          const toggledTask = { ...task, done: !task.done, lastSave: new Date() };
-
-          // If we just marked the task as done and it is recurring with a deadline,
-          // create the next occurrence immediately.
-          if (
-            !task.done && // it was previously not done (now becoming done)
-            task.recurrence &&
-            task.deadline
-          ) {
-            const nextDeadline = getNextOccurrenceDate(
-              new Date(task.deadline),
-              task.recurrence,
-            );
-            const nextTask: Task = {
-              ...task,
-              id: generateUUID(),
-              done: false,
-              date: new Date(),
-              deadline: nextDeadline,
-              lastSave: undefined,
-            };
-            newOccurrences.push(nextTask);
-          }
-
-          return toggledTask;
+          return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      // If the task is being marked as done *now* and it is recurring, create next occurrence
+      if (!selectedTask.done && selectedTask.recurrence) {
+        const nextDeadline =
+          selectedTask.deadline !== undefined
+            ? addInterval(new Date(selectedTask.deadline), selectedTask.recurrence)
+            : undefined;
+
+        const nextTask: Task = {
+          ...selectedTask,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: nextDeadline,
+          lastSave: undefined,
+          position: undefined,
+        };
+        updatedTasks.push(nextTask);
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: [...updatedTasks, ...newOccurrences],
+        tasks: updatedTasks,
       }));
 
       const allTasksDone = updatedTasks.every((task) => task.done);

@@ -119,17 +119,20 @@ export const calculateDateDifference = (
 };
 
 /**
- * Calculates the next occurrence date based on the provided recurrence rule.
- * @param date      Current reference date.
- * @param recurrence Recurrence interval: "daily" | "weekly" | "monthly".
- * @returns A new `Date` representing the next occurrence.
- * (Non-breaking additive utility – existing code that doesn't use it is unaffected.)
+ * Returns a new Date shifted by the specified recurrence interval.
+ * For monthly recurrence, if the original day does not exist in the
+ * target month (e.g., 31 → Feb), the result is clamped to the last
+ * valid day of that month.
+ *
+ * @param date       The base date to shift.
+ * @param recurrence Recurrence interval: "daily", "weekly", or "monthly".
+ * @returns          A **new** Date instance representing the shifted date.
  */
-export const getNextOccurrenceDate = (
+export const addInterval = (
   date: Date,
   recurrence: "daily" | "weekly" | "monthly",
 ): Date => {
-  const next = new Date(date);
+  const next = new Date(date); // clone to avoid mutating original
 
   switch (recurrence) {
     case "daily":
@@ -138,12 +141,20 @@ export const getNextOccurrenceDate = (
     case "weekly":
       next.setDate(next.getDate() + 7);
       break;
-    case "monthly":
-      // JS Date auto-adjust handles month overflow (e.g., Jan 31 -> Feb 28/29)
+    case "monthly": {
+      const originalDay = next.getDate();
       next.setMonth(next.getMonth() + 1);
+      // If month overflowed (e.g., Jan 31 → Mar 3), clamp to last day
+      if (next.getDate() !== originalDay) {
+        // Setting date to 0 moves to the last day of previous month,
+        // which is the intended target after overflow.
+        next.setDate(0);
+      }
       break;
+    }
     default:
-      throw new Error(`Unsupported recurrence value: ${recurrence}`);
+      // Should not reach here, but return original date as safeguard
+      return new Date(date);
   }
 
   return next;

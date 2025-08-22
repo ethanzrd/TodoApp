@@ -29,12 +29,7 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import {
-  getFontColor,
-  showToast,
-  generateUUID,
-  getNextOccurrenceDate,
-} from "../../utils";
+import { getFontColor, showToast, addInterval, generateUUID } from "../../utils";
 import {
   NoTasks,
   RingAlarm,
@@ -273,37 +268,41 @@ export const TasksList: React.FC = () => {
 
   const handleMarkSelectedAsDone = () => {
     setUser((prevUser) => {
-      const newOccurrences: Task[] = [];
-
+      // First, mark selected tasks as done
       const updatedTasks = prevUser.tasks.map((task) => {
         if (multipleSelectedTasks.includes(task.id)) {
-          // If task is being marked done now (was previously not done)
-          if (!task.done && task.recurrence && task.deadline) {
-            const nextDeadline = getNextOccurrenceDate(
-              new Date(task.deadline),
-              task.recurrence,
-            );
-
-            const nextTask: Task = {
-              ...task,
-              id: generateUUID(),
-              done: false,
-              date: new Date(),
-              deadline: nextDeadline,
-              lastSave: undefined,
-            };
-            newOccurrences.push(nextTask);
-          }
-
-          // Mark the task as done
           return { ...task, done: true, lastSave: new Date() };
         }
         return task;
       });
 
+      // Then, create next occurrences for newly-completed recurring tasks
+      const newTasks: Task[] = [];
+      prevUser.tasks.forEach((task) => {
+        if (
+          multipleSelectedTasks.includes(task.id) && // part of selection
+          !task.done && // was not already done
+          task.recurrence // has recurrence rule
+        ) {
+          const nextDeadline = task.deadline
+            ? addInterval(new Date(task.deadline), task.recurrence)
+            : undefined;
+
+          newTasks.push({
+            ...task,
+            id: generateUUID(),
+            done: false,
+            date: new Date(),
+            deadline: nextDeadline,
+            lastSave: undefined,
+            position: undefined,
+          });
+        }
+      });
+
       return {
         ...prevUser,
-        tasks: [...updatedTasks, ...newOccurrences],
+        tasks: [...updatedTasks, ...newTasks],
       };
     });
     // Clear the selected task IDs after the operation

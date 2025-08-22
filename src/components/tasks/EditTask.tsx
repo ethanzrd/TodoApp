@@ -6,18 +6,18 @@ import {
   DialogContent,
   IconButton,
   InputAdornment,
-  MenuItem,
   TextField,
   TextFieldProps,
   Tooltip,
 } from "@mui/material";
+import { Select, MenuItem } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../../constants";
 import { UserContext } from "../../contexts/UserContext";
 import { DialogBtn } from "../../styles";
 import { Category, Task } from "../../types/user";
-import { formatDate, showToast, timeAgo } from "../../utils";
+import { formatDate, showToast, timeAgo, getFontColor } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { ColorPalette } from "../../theme/themeConfig";
 import { CategorySelect } from "../CategorySelect";
@@ -65,16 +65,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
-    // Special handling for deadline (needs to be stored as Date | undefined)
-    if (name === "deadline") {
-      setEditedTask((prevTask) => ({
-        ...(prevTask as Task),
-        deadline: value ? new Date(value) : undefined,
-      }));
-      return;
-    }
-
-    // Update the editedTask state with the changed value for other fields
+    // Update the editedTask state with the changed value.
     setEditedTask((prevTask) => ({
       ...(prevTask as Task),
       [name]: value,
@@ -253,19 +244,6 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           }}
         />
 
-        <StyledInput
-          label="Recurrence"
-          name="recurrence"
-          select
-          value={editedTask?.recurrence || "none"}
-          onChange={handleInputChange}
-        >
-          <MenuItem value="none">None</MenuItem>
-          <MenuItem value="daily">Daily</MenuItem>
-          <MenuItem value="weekly">Weekly</MenuItem>
-          <MenuItem value="monthly">Monthly</MenuItem>
-        </StyledInput>
-
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect
             fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
@@ -281,6 +259,29 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             marginTop: "8px",
           }}
         >
+          {/* Recurrence selector */}
+          <Select
+            fullWidth
+            value={editedTask?.recurrence ?? "none"}
+            onChange={(e) =>
+              setEditedTask((prev) => ({
+                ...(prev as Task),
+                recurrence: e.target.value === "none" ? undefined : (e.target.value as any),
+              }))
+            }
+            displayEmpty
+            sx={{
+              mb: "14px",
+              borderRadius: "16px",
+              background: theme.secondary,
+              color: getFontColor(theme.secondary),
+            }}
+          >
+            <MenuItem value="none">None</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </Select>
           <ColorPicker
             width={"100%"}
             color={editedTask?.color || "#000000"}

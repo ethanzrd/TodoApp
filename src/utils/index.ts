@@ -6,11 +6,10 @@ export { saveQRCode } from "./saveQRCode";
 export { showToast } from "./showToast";
 export { generateUUID } from "./generateUUID";
 export {
-  // Non-breaking additive exports: existing consumers remain unaffected.
   timeAgo,
   formatDate,
   calculateDateDifference,
-  getNextOccurrenceDate,
+  addInterval,
 } from "./timeUtils";
 export {
   initDB,
