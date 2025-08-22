@@ -117,3 +117,29 @@ export const calculateDateDifference = (
   // beyond 7 days
   return rtf.format(dayDiff, "day");
 };
+
+/**
+ * Shift a date by a recurrence interval.
+ * - daily: +1 day
+ * - weekly: +7 days
+ * - monthly: same day-of-month next month (if overflow, clamp to end-of-month)
+ */
+export const shiftDateByRecurrence = (date: Date, recurrence: "daily" | "weekly" | "monthly"): Date => {
+  const base = new Date(date);
+  if (recurrence === "daily") {
+    base.setDate(base.getDate() + 1);
+    return base;
+  }
+  if (recurrence === "weekly") {
+    base.setDate(base.getDate() + 7);
+    return base;
+  }
+  // monthly
+  const day = base.getDate();
+  const targetMonth = base.getMonth() + 1;
+  const targetYear = base.getFullYear() + Math.floor(targetMonth / 12);
+  const normalizedMonth = targetMonth % 12;
+  const endOfTargetMonth = new Date(targetYear, normalizedMonth + 1, 0).getDate();
+  const clampedDay = Math.min(day, endOfTargetMonth);
+  return new Date(base.getFullYear(), base.getMonth() + 1, clampedDay, base.getHours(), base.getMinutes(), base.getSeconds(), base.getMilliseconds());
+};

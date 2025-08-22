@@ -27,7 +27,7 @@ import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
-import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { calculateDateDifference, generateUUID, showToast, shiftDateByRecurrence } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,18 +70,40 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      let nextOccurrence: Task | null = null;
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
-          return { ...task, done: !task.done, lastSave: new Date() };
+          const willBeDone = !task.done;
+          // If marking as done and task is recurring, create next occurrence
+          if (willBeDone && task.recurrence) {
+            const baseDate = task.deadline ? new Date(task.deadline) : new Date(task.date);
+            const nextDeadline = task.deadline
+              ? shiftDateByRecurrence(new Date(task.deadline), task.recurrence)
+              : undefined;
+            const nextDate = shiftDateByRecurrence(baseDate, task.recurrence);
+            nextOccurrence = {
+              ...task,
+              id: generateUUID(),
+              done: false,
+              pinned: task.pinned,
+              date: nextDeadline ? new Date() : nextDate, // set created now if deadline exists; else shift date
+              deadline: nextDeadline,
+              lastSave: undefined,
+              sharedBy: task.sharedBy,
+              position: undefined,
+            };
+          }
+          return { ...task, done: willBeDone, lastSave: new Date() };
         }
         return task;
       });
+      const finalTasks = nextOccurrence ? [...updatedTasks, nextOccurrence] : updatedTasks;
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: finalTasks,
       }));
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+      const allTasksDone = finalTasks.every((task) => task.done);
 
       if (allTasksDone) {
         showToast(

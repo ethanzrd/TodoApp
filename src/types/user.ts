@@ -35,6 +35,11 @@ export interface User {
 }
 
 /**
+ * Represents a recurrence interval for a task.
+ */
+export type Recurrence = "daily" | "weekly" | "monthly";
+
+/**
  * Represents a task in the application.
  */
 export interface Task {
@@ -57,6 +62,11 @@ export interface Task {
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
   position?: number;
+  /**
+   * Optional recurrence configuration.
+   * When set, a next occurrence is created upon completion.
+   */
+  recurrence?: Recurrence;
 }
 
 /**

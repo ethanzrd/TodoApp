@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip, MenuItem, TextField } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -27,6 +27,11 @@ const AddTask = () => {
     "sessionStorage",
   );
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
+  const [recurrence, setRecurrence] = useStorageState<"daily" | "weekly" | "monthly" | "">(
+    "",
+    "recurrence",
+    "sessionStorage",
+  );
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
@@ -111,6 +116,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence !== "" ? recurrence : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +135,7 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories", "recurrence"];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -202,7 +208,7 @@ const AddTask = () => {
                   deadline && deadline !== "" ? (
                     <InputAdornment position="start">
                       <Tooltip title="Clear">
-                        <IconButton color="error" onClick={() => setDeadline("")}>
+                        <IconButton color="error" onClick={() => setDeadline("") }>
                           <CancelRounded />
                         </IconButton>
                       </Tooltip>
@@ -211,6 +217,26 @@ const AddTask = () => {
               },
             }}
           />
+
+          <TextField
+            select
+            fullWidth
+            label="Recurrence"
+            value={recurrence}
+            onChange={(e) => setRecurrence(e.target.value as any)}
+            margin="normal"
+            helperText="Optional: repeat automatically after completion"
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
+          >
+            <MenuItem value="">None</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </TextField>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>

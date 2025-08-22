@@ -9,6 +9,7 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -84,6 +85,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +243,27 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <TextField
+          select
+          fullWidth
+          label="Recurrence"
+          name="recurrence"
+          value={editedTask?.recurrence || ""}
+          onChange={handleInputChange}
+          margin="normal"
+          helperText="Optional: repeat automatically after completion"
+          slotProps={{
+            inputLabel: {
+              shrink: true,
+            },
+          }}
+        >
+          <MenuItem value="">None</MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </TextField>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

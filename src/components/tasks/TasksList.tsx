@@ -29,7 +29,7 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { getFontColor, showToast, shiftDateByRecurrence, generateUUID } from "../../utils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,15 +267,38 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
+    const selectedSet = new Set(multipleSelectedTasks);
+    const newTasks: Task[] = [];
+    const nextOccurrences: Task[] = [];
+    for (const task of user.tasks) {
+      if (selectedSet.has(task.id)) {
+        const updated = { ...task, done: true, lastSave: new Date() };
+        newTasks.push(updated);
+        if (task.recurrence) {
+          const baseDate = task.deadline ? new Date(task.deadline) : new Date(task.date);
+          const nextDeadline = task.deadline
+            ? shiftDateByRecurrence(new Date(task.deadline), task.recurrence)
+            : undefined;
+          const nextDate = shiftDateByRecurrence(baseDate, task.recurrence);
+          nextOccurrences.push({
+            ...task,
+            id: generateUUID(),
+            done: false,
+            pinned: task.pinned,
+            date: nextDeadline ? new Date() : nextDate,
+            deadline: nextDeadline,
+            lastSave: undefined,
+            sharedBy: task.sharedBy,
+            position: undefined,
+          });
+        }
+      } else {
+        newTasks.push(task);
+      }
+    }
     setUser((prevUser) => ({
       ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
-        if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
-          return { ...task, done: true, lastSave: new Date() };
-        }
-        return task;
-      }),
+      tasks: [...newTasks, ...nextOccurrences],
     }));
     // Clear the selected task IDs after the operation
     setMultipleSelectedTasks([]);
