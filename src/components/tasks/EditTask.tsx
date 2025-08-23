@@ -243,7 +243,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
-
+        {/* Dropdown for choosing how often the task should recur */}
         <StyledInput
           label="Recurrence"
           select
