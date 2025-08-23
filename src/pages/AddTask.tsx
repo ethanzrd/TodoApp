@@ -242,7 +242,7 @@ const AddTask = () => {
             name="recurrence"
             select
             value={recurrence}
-            onChange={(e) => setRecurrence(e.target.value)}
+            onChange={(e) => setRecurrence(e.target.value as Recurrence | "none")}
           >
             <MenuItem value="none">None</MenuItem>
             <MenuItem value="daily">Daily</MenuItem>
