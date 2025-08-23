@@ -84,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || "none",
             lastSave: new Date(),
           };
         }
@@ -269,6 +270,22 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             }}
           />
         </div>
+        <StyledInput
+          label="Recurrence"
+          name="recurrence"
+          select
+          value={editedTask?.recurrence || "none"}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value as "none" | "daily" | "weekly" | "monthly";
+            setEditedTask((prev) => ({ ...(prev as Task), recurrence: value }));
+          }}
+          SelectProps={{ native: true }}
+        >
+          <option value="none">None</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </StyledInput>
       </DialogContent>
       <DialogActions>
         <DialogBtn onClick={handleCancel}>Cancel</DialogBtn>

@@ -28,6 +28,7 @@ import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
 import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { addDays, addWeeks, addMonths } from "../../utils/timeUtils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -67,15 +68,52 @@ export const TaskMenu = () => {
   };
 
   const handleMarkAsDone = () => {
-    // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+
+      const target = tasks.find((t) => t.id === selectedTaskId);
+      const wasDone = !!target?.done;
+
+      const updatedTasksBase = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      let updatedTasks = updatedTasksBase;
+
+      if (
+        !wasDone &&
+        target &&
+        target.recurrence &&
+        target.recurrence !== "none" &&
+        target.deadline
+      ) {
+        let nextDeadline = new Date(target.deadline);
+        switch (target.recurrence) {
+          case "daily":
+            nextDeadline = addDays(nextDeadline, 1);
+            break;
+          case "weekly":
+            nextDeadline = addWeeks(nextDeadline, 1);
+            break;
+          case "monthly":
+            nextDeadline = addMonths(nextDeadline, 1);
+            break;
+        }
+        const nextTask: Task = {
+          ...target,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          lastSave: undefined,
+          deadline: nextDeadline,
+          position: undefined,
+        };
+        updatedTasks = [...updatedTasksBase, nextTask];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,

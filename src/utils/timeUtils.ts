@@ -2,6 +2,24 @@ const MS_IN_MINUTE = 60 * 1000;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 const MS_IN_DAY = 24 * MS_IN_HOUR;
 
+export const addDays = (date: Date, days: number): Date => {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+export const addWeeks = (date: Date, weeks: number): Date => addDays(date, weeks * 7);
+
+export const addMonths = (date: Date, months: number): Date => {
+  const d = new Date(date);
+  const day = d.getDate();
+  d.setMonth(d.getMonth() + months);
+  if (d.getDate() < day) {
+    d.setDate(0);
+  }
+  return d;
+};
+
 const getLocale = () => navigator.language || "en-US";
 
 export const isSameDay = (date1: Date, date2: Date): boolean =>

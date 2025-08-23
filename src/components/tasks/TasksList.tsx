@@ -29,7 +29,8 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { getFontColor, showToast, generateUUID } from "../../utils";
+import { addDays, addWeeks, addMonths } from "../../utils/timeUtils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,17 +268,51 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
+    setUser((prevUser) => {
+      const baseTasks = prevUser.tasks.map((task) => {
         if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
           return { ...task, done: true, lastSave: new Date() };
         }
         return task;
-      }),
-    }));
-    // Clear the selected task IDs after the operation
+      });
+
+      const nextOccurrences: Task[] = [];
+      prevUser.tasks.forEach((task) => {
+        if (
+          multipleSelectedTasks.includes(task.id) &&
+          task.recurrence &&
+          task.recurrence !== "none" &&
+          task.deadline
+        ) {
+          let nextDeadline = new Date(task.deadline);
+          switch (task.recurrence) {
+            case "daily":
+              nextDeadline = addDays(nextDeadline, 1);
+              break;
+            case "weekly":
+              nextDeadline = addWeeks(nextDeadline, 1);
+              break;
+            case "monthly":
+              nextDeadline = addMonths(nextDeadline, 1);
+              break;
+          }
+          nextOccurrences.push({
+            ...task,
+            id: generateUUID(),
+            done: false,
+            date: new Date(),
+            lastSave: undefined,
+            deadline: nextDeadline,
+            position: undefined,
+          });
+        }
+      });
+
+      return {
+        ...prevUser,
+        tasks: [...baseTasks, ...nextOccurrences],
+      };
+    });
     setMultipleSelectedTasks([]);
   };
 
