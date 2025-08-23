@@ -29,7 +29,7 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { getFontColor, showToast, generateUUID } from "../../utils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,16 +267,49 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
+    setUser((prevUser) => {
+      const updatedTasks = prevUser.tasks.map((task) => {
         if (multipleSelectedTasks.includes(task.id)) {
           // Mark the task as done if selected
           return { ...task, done: true, lastSave: new Date() };
         }
         return task;
-      }),
-    }));
+      });
+
+      multipleSelectedTasks.forEach((taskId) => {
+        const originalTask = prevUser.tasks.find((t) => t.id === taskId);
+        if (originalTask && !originalTask.done && originalTask.recurrence) {
+          const newTask: Task = {
+            ...originalTask,
+            id: generateUUID(),
+            done: false,
+            date: new Date(),
+            lastSave: new Date(),
+          };
+          if (originalTask.deadline) {
+            const newDeadline = new Date(originalTask.deadline);
+            switch (originalTask.recurrence) {
+              case "daily":
+                newDeadline.setDate(newDeadline.getDate() + 1);
+                break;
+              case "weekly":
+                newDeadline.setDate(newDeadline.getDate() + 7);
+                break;
+              case "monthly":
+                newDeadline.setMonth(newDeadline.getMonth() + 1);
+                break;
+            }
+            newTask.deadline = newDeadline;
+          }
+          updatedTasks.push(newTask);
+        }
+      });
+
+      return {
+        ...prevUser,
+        tasks: updatedTasks,
+      };
+    });
     // Clear the selected task IDs after the operation
     setMultipleSelectedTasks([]);
   };

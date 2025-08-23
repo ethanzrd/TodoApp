@@ -50,6 +50,7 @@ export interface Task {
    */
   date: Date;
   deadline?: Date;
+  recurrence?: "daily" | "weekly" | "monthly";
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
