@@ -70,10 +70,12 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      // Hold any new recurring tasks to append later so the map below isn't mutated mid-iteration
       const additionalTasks: Task[] = [];
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           const willBeDone = !task.done;
+          // When completing a recurring task, queue up its next occurrence without altering existing tasks
           if (willBeDone && task.recurrence) {
             const nextDeadline = (() => {
               if (!task.deadline) return undefined;
