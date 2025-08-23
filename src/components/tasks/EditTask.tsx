@@ -9,6 +9,8 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -84,6 +86,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +244,30 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+        <Select
+          value={editedTask?.recurrence || ""}
+          onChange={(e) =>
+            setEditedTask((prevTask) => ({
+              ...(prevTask as Task),
+              recurrence: e.target.value as "daily" | "weekly" | "monthly",
+            }))
+          }
+          displayEmpty
+          fullWidth
+          sx={{
+            borderRadius: "16px",
+            "& .MuiSelect-select": {
+              borderColor: "red",
+            },
+          }}
+        >
+          <MenuItem value="">
+            <em>No Recurrence</em>
+          </MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </Select>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

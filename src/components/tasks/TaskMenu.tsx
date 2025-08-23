@@ -70,12 +70,46 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+      const taskToMark = tasks.find((task) => task.id === selectedTaskId);
+
+      let updatedTasks = [...tasks];
+      let newTaskToAdd: Task | null = null;
+
+      // If the task is recurring and is being marked as done
+      if (taskToMark && taskToMark.recurrence && !taskToMark.done) {
+        newTaskToAdd = {
+          ...taskToMark,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          lastSave: undefined,
+        };
+        if (newTaskToAdd.deadline) {
+          const newDeadline = new Date(newTaskToAdd.deadline);
+          if (taskToMark.recurrence === "daily") {
+            newDeadline.setDate(newDeadline.getDate() + 1);
+          } else if (taskToMark.recurrence === "weekly") {
+            newDeadline.setDate(newDeadline.getDate() + 7);
+          } else if (taskToMark.recurrence === "monthly") {
+            newDeadline.setMonth(newDeadline.getMonth() + 1);
+          }
+          newTaskToAdd.deadline = newDeadline;
+        }
+      }
+
+      // Mark the current task as done/undone
+      updatedTasks = updatedTasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      // Add the new task if it was created
+      if (newTaskToAdd) {
+        updatedTasks.push(newTaskToAdd);
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,
