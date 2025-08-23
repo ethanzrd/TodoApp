@@ -50,6 +50,10 @@ export interface Task {
    */
   date: Date;
   deadline?: Date;
+  /**
+   * Recurrence frequency for repeating tasks
+   */
+  recurrence?: "daily" | "weekly" | "monthly";
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
