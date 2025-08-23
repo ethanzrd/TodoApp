@@ -51,3 +51,13 @@ export const PFP_MAX_SIZE = 16 * 1024 * 1024; //MB;
  * Regular expression to match URLs in a string
  */
 export const URL_REGEX = /((?:https?):\/\/[^\s/$.?#].[^\s]*)/gi;
+
+/**
+ * Maximum interval for recurring tasks
+ */
+export const MAX_RECURRING_INTERVAL = 365;
+
+/**
+ * Recurring frequency options
+ */
+export const RECURRING_FREQUENCIES = ["daily", "weekly", "monthly", "yearly"] as const;

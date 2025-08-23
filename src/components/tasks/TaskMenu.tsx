@@ -5,6 +5,7 @@ import {
   ContentCopy,
   DeleteRounded,
   Done,
+  DoneAll,
   EditRounded,
   LaunchRounded,
   LinkRounded,
@@ -15,6 +16,7 @@ import {
   RadioButtonChecked,
   RecordVoiceOver,
   RecordVoiceOverRounded,
+  Stop,
 } from "@mui/icons-material";
 import { Divider, IconButton, Menu, MenuItem } from "@mui/material";
 import { JSX, useContext, useMemo, useState } from "react";
@@ -129,6 +131,11 @@ export const TaskMenu = () => {
           id: generateUUID(),
           date: new Date(),
           lastSave: undefined,
+          parentTaskId: undefined, // Remove parent reference for duplicated tasks
+          recurring:
+            selectedTask.recurring && !selectedTask.parentTaskId
+              ? selectedTask.recurring
+              : undefined, // Only keep recurring for parent tasks
         };
         // Add the duplicated task to the existing tasks
         const updatedTasks = [...tasks, duplicatedTask];
@@ -138,6 +145,57 @@ export const TaskMenu = () => {
           tasks: updatedTasks,
         }));
       }
+    }
+  };
+
+  const handleCompleteAllFutureInstances = () => {
+    handleCloseMoreMenu();
+    if (selectedTaskId && selectedTask.recurring && !selectedTask.parentTaskId) {
+      const futureInstances = tasks.filter(
+        (task) => task.parentTaskId === selectedTaskId && !task.done,
+      );
+
+      const updatedTasks = tasks.map((task) => {
+        if (task.parentTaskId === selectedTaskId && !task.done) {
+          return { ...task, done: true, lastSave: new Date() };
+        }
+        return task;
+      });
+
+      setUser((prevUser) => ({
+        ...prevUser,
+        tasks: updatedTasks,
+      }));
+
+      showToast(
+        <div>
+          Completed {futureInstances.length} future instance
+          {futureInstances.length !== 1 ? "s" : ""} of <b translate="no">{selectedTask.name}</b>
+        </div>,
+      );
+    }
+  };
+
+  const handleStopRecurring = () => {
+    handleCloseMoreMenu();
+    if (selectedTaskId && selectedTask.recurring && !selectedTask.parentTaskId) {
+      const updatedTasks = tasks.map((task) => {
+        if (task.id === selectedTaskId) {
+          return { ...task, recurring: undefined, lastSave: new Date() };
+        }
+        return task;
+      });
+
+      setUser((prevUser) => ({
+        ...prevUser,
+        tasks: updatedTasks,
+      }));
+
+      showToast(
+        <div>
+          Stopped recurring for <b translate="no">{selectedTask.name}</b>
+        </div>,
+      );
     }
   };
 
@@ -351,6 +409,17 @@ export const TaskMenu = () => {
     <StyledMenuItem key="duplicate" onClick={handleDuplicateTask}>
       <ContentCopy /> &nbsp; Duplicate
     </StyledMenuItem>,
+
+    ...(selectedTask.recurring && !selectedTask.parentTaskId
+      ? [
+          <StyledMenuItem key="complete-all-future" onClick={handleCompleteAllFutureInstances}>
+            <DoneAll /> &nbsp; Complete all future instances
+          </StyledMenuItem>,
+          <StyledMenuItem key="stop-recurring" onClick={handleStopRecurring}>
+            <Stop /> &nbsp; Stop recurring
+          </StyledMenuItem>,
+        ]
+      : []),
 
     <Divider key="divider-2" />,
 

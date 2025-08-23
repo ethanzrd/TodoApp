@@ -12,11 +12,13 @@ import {
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
+import { RecurringTaskForm } from "../RecurringTaskForm";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../../constants";
 import { UserContext } from "../../contexts/UserContext";
 import { DialogBtn } from "../../styles";
 import { Category, Task } from "../../types/user";
 import { formatDate, showToast, timeAgo } from "../../utils";
+import { calculateNextOccurrence } from "../../utils/recurringUtils";
 import { useTheme } from "@emotion/react";
 import { ColorPalette } from "../../theme/themeConfig";
 import { CategorySelect } from "../CategorySelect";
@@ -33,6 +35,12 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const [editedTask, setEditedTask] = useState<Task | undefined>(task);
   const [emoji, setEmoji] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [recurringFrequency, setRecurringFrequency] = useState<
+    "daily" | "weekly" | "monthly" | "yearly"
+  >("daily");
+  const [recurringInterval, setRecurringInterval] = useState<number>(1);
+  const [recurringEndDate, setRecurringEndDate] = useState<string>("");
 
   const theme = useTheme();
 
@@ -58,6 +66,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   useEffect(() => {
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
+    if (task?.recurring && !task.parentTaskId) {
+      setIsRecurring(true);
+      setRecurringFrequency(task.recurring.frequency);
+      setRecurringInterval(task.recurring.interval);
+      setRecurringEndDate(
+        task.recurring.endDate ? new Date(task.recurring.endDate).toISOString().split("T")[0] : "",
+      );
+    } else {
+      setIsRecurring(false);
+      setRecurringFrequency("daily");
+      setRecurringInterval(1);
+      setRecurringEndDate("");
+    }
   }, [task]);
 
   // Event handler for input changes in the form fields.
@@ -76,7 +97,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     if (editedTask && !nameError && !descriptionError) {
       const updatedTasks = user.tasks.map((task) => {
         if (task.id === editedTask.id) {
-          return {
+          const updatedTask = {
             ...task,
             name: editedTask.name,
             color: editedTask.color,
@@ -86,6 +107,25 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             category: editedTask.category || undefined,
             lastSave: new Date(),
           };
+
+          if (!task.parentTaskId) {
+            if (isRecurring) {
+              const nextOccurrence =
+                task.recurring?.nextOccurrence ||
+                calculateNextOccurrence(task.date, recurringFrequency, recurringInterval);
+
+              updatedTask.recurring = {
+                frequency: recurringFrequency,
+                interval: recurringInterval,
+                endDate: recurringEndDate !== "" ? new Date(recurringEndDate) : undefined,
+                nextOccurrence,
+              };
+            } else {
+              updatedTask.recurring = undefined;
+            }
+          }
+
+          return updatedTask;
         }
         return task;
       });
@@ -106,6 +146,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     onClose();
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
+    if (task?.recurring && !task.parentTaskId) {
+      setIsRecurring(true);
+      setRecurringFrequency(task.recurring.frequency);
+      setRecurringInterval(task.recurring.interval);
+      setRecurringEndDate(
+        task.recurring.endDate ? new Date(task.recurring.endDate).toISOString().split("T")[0] : "",
+      );
+    } else {
+      setIsRecurring(false);
+      setRecurringFrequency("daily");
+      setRecurringInterval(1);
+      setRecurringEndDate("");
+    }
   };
 
   useEffect(() => {
@@ -247,6 +300,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
             selectedCategories={selectedCategories}
             onCategoryChange={(categories) => setSelectedCategories(categories)}
+          />
+        )}
+
+        {!editedTask?.parentTaskId && (
+          <RecurringTaskForm
+            isRecurring={isRecurring}
+            onRecurringChange={setIsRecurring}
+            frequency={recurringFrequency}
+            onFrequencyChange={setRecurringFrequency}
+            interval={recurringInterval}
+            onIntervalChange={setRecurringInterval}
+            endDate={recurringEndDate}
+            onEndDateChange={setRecurringEndDate}
           />
         )}
         <div

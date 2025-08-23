@@ -57,6 +57,19 @@ export interface Task {
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
   position?: number;
+  /**
+   * Recurring task configuration
+   */
+  recurring?: {
+    frequency: "daily" | "weekly" | "monthly" | "yearly";
+    interval: number;
+    endDate?: Date;
+    nextOccurrence?: Date;
+  };
+  /**
+   * ID of parent recurring task (for generated instances)
+   */
+  parentTaskId?: UUID;
 }
 
 /**

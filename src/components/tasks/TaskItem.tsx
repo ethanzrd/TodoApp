@@ -1,6 +1,12 @@
 import { useRef, memo, useContext } from "react";
 import { Emoji } from "emoji-picker-react";
-import { DoneRounded, PushPinRounded, Link, DragIndicatorRounded } from "@mui/icons-material";
+import {
+  DoneRounded,
+  PushPinRounded,
+  Link,
+  DragIndicatorRounded,
+  Repeat,
+} from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 import type { Task, UUID } from "../../types/user";
 import {
@@ -22,6 +28,7 @@ import {
   TaskActionsContainer,
 } from "./tasks.styled";
 import { calculateDateDifference, formatDate, getFontColor, systemInfo } from "../../utils";
+import { formatRecurringDescription } from "../../utils/recurringUtils";
 import { RenderTaskDescription } from "./RenderTaskDescription";
 import { CategoryBadge } from "..";
 import { UserContext } from "../../contexts/UserContext";
@@ -164,6 +171,16 @@ export const TaskItem = memo(
           {task.pinned && (
             <Pinned translate="yes">
               <PushPinRounded fontSize="small" /> &nbsp; Pinned
+            </Pinned>
+          )}
+          {task.recurring && !task.parentTaskId && (
+            <Pinned translate="yes">
+              <Repeat fontSize="small" /> &nbsp; {formatRecurringDescription(task.recurring)}
+            </Pinned>
+          )}
+          {task.parentTaskId && (
+            <Pinned translate="yes">
+              <Repeat fontSize="small" sx={{ opacity: 0.7 }} /> &nbsp; Recurring instance
             </Pinned>
           )}
           <TaskHeader>

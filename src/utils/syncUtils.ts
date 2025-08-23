@@ -238,6 +238,9 @@ export function decompressSyncData(compressed: string): SyncData | null {
       if (task.lastSave) task.lastSave = new Date(task.lastSave);
       if (task.date) task.date = new Date(task.date);
       if (task.deadline) task.deadline = new Date(task.deadline);
+      if (task.recurring?.endDate) task.recurring.endDate = new Date(task.recurring.endDate);
+      if (task.recurring?.nextOccurrence)
+        task.recurring.nextOccurrence = new Date(task.recurring.nextOccurrence);
     });
 
     return data;

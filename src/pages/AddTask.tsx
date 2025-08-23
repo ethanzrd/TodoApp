@@ -6,10 +6,12 @@ import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
 import { IconButton, InputAdornment, Tooltip } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
+import { RecurringTaskForm } from "../components/RecurringTaskForm";
 import { UserContext } from "../contexts/UserContext";
 import { useStorageState } from "../hooks/useStorageState";
 import { useTheme } from "@emotion/react";
 import { generateUUID, getFontColor, isDark, showToast } from "../utils";
+import { calculateNextOccurrence } from "../utils/recurringUtils";
 import { ColorPalette } from "../theme/themeConfig";
 import InputThemeProvider from "../contexts/InputThemeProvider";
 import { CategorySelect } from "../components/CategorySelect";
@@ -32,6 +34,24 @@ const AddTask = () => {
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
     [],
     "categories",
+    "sessionStorage",
+  );
+  const [isRecurring, setIsRecurring] = useStorageState<boolean>(
+    false,
+    "isRecurring",
+    "sessionStorage",
+  );
+  const [recurringFrequency, setRecurringFrequency] = useStorageState<
+    "daily" | "weekly" | "monthly" | "yearly"
+  >("daily", "recurringFrequency", "sessionStorage");
+  const [recurringInterval, setRecurringInterval] = useStorageState<number>(
+    1,
+    "recurringInterval",
+    "sessionStorage",
+  );
+  const [recurringEndDate, setRecurringEndDate] = useStorageState<string>(
+    "",
+    "recurringEndDate",
     "sessionStorage",
   );
 
@@ -100,6 +120,7 @@ const AddTask = () => {
       return; // Do not add the task if the name or description exceeds the maximum length
     }
 
+    const taskDate = new Date();
     const newTask: Task = {
       id: generateUUID(),
       done: false,
@@ -108,9 +129,21 @@ const AddTask = () => {
       description: description !== "" ? description : undefined,
       emoji: emoji ? emoji : undefined,
       color,
-      date: new Date(),
+      date: taskDate,
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurring: isRecurring
+        ? {
+            frequency: recurringFrequency,
+            interval: recurringInterval,
+            endDate: recurringEndDate !== "" ? new Date(recurringEndDate) : undefined,
+            nextOccurrence: calculateNextOccurrence(
+              taskDate,
+              recurringFrequency,
+              recurringInterval,
+            ),
+          }
+        : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +162,18 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "isRecurring",
+      "recurringFrequency",
+      "recurringInterval",
+      "recurringEndDate",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -223,6 +267,17 @@ const AddTask = () => {
               />
             </div>
           )}
+
+          <RecurringTaskForm
+            isRecurring={isRecurring}
+            onRecurringChange={setIsRecurring}
+            frequency={recurringFrequency}
+            onFrequencyChange={setRecurringFrequency}
+            interval={recurringInterval}
+            onIntervalChange={setRecurringInterval}
+            endDate={recurringEndDate}
+            onEndDateChange={setRecurringEndDate}
+          />
         </InputThemeProvider>
         <ColorPicker
           color={color}
