@@ -70,18 +70,43 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
-        if (task.id === selectedTaskId) {
-          return { ...task, done: !task.done, lastSave: new Date() };
-        }
-        return task;
-      });
-      setUser((prevUser) => ({
-        ...prevUser,
-        tasks: updatedTasks,
-      }));
+      let allTasksDone = false;
+      setUser((prevUser) => {
+        const targetTask = prevUser.tasks.find((t) => t.id === selectedTaskId);
+        let updatedTasks = prevUser.tasks.map((task) => {
+          if (task.id === selectedTaskId) {
+            return { ...task, done: !task.done, lastSave: new Date() };
+          }
+          return task;
+        });
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+        if (targetTask && !targetTask.done && targetTask.recurrence) {
+          const baseDate = targetTask.deadline ? new Date(targetTask.deadline) : new Date();
+          if (targetTask.recurrence === "daily") {
+            baseDate.setDate(baseDate.getDate() + 1);
+          } else if (targetTask.recurrence === "weekly") {
+            baseDate.setDate(baseDate.getDate() + 7);
+          } else if (targetTask.recurrence === "monthly") {
+            baseDate.setMonth(baseDate.getMonth() + 1);
+          }
+          const newTask: Task = {
+            ...targetTask,
+            id: generateUUID(),
+            done: false,
+            date: new Date(),
+            deadline: baseDate,
+            lastSave: new Date(),
+          };
+          updatedTasks = [...updatedTasks, newTask];
+        }
+
+        allTasksDone = updatedTasks.every((task) => task.done);
+
+        return {
+          ...prevUser,
+          tasks: updatedTasks,
+        };
+      });
 
       if (allTasksDone) {
         showToast(

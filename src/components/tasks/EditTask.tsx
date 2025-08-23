@@ -6,6 +6,7 @@ import {
   DialogContent,
   IconButton,
   InputAdornment,
+  MenuItem,
   TextField,
   TextFieldProps,
   Tooltip,
@@ -83,6 +84,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             emoji: editedTask.emoji || undefined,
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
+            recurrence: editedTask.recurrence || undefined,
             category: editedTask.category || undefined,
             lastSave: new Date(),
           };
@@ -241,6 +243,26 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+        {/* Dropdown for choosing how often the task should recur */}
+        <StyledInput
+          label="Recurrence"
+          select
+          value={editedTask?.recurrence || "none"}
+          onChange={(e) =>
+            setEditedTask((prevTask) => ({
+              ...(prevTask as Task),
+              recurrence:
+                e.target.value === "none"
+                  ? undefined
+                  : (e.target.value as "daily" | "weekly" | "monthly"),
+            }))
+          }
+        >
+          <MenuItem value="none">None</MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect
