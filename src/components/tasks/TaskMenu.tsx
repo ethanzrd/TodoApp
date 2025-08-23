@@ -84,6 +84,9 @@ export const TaskMenu = () => {
       });
 
       let finalTasks = baseUpdated;
+      // Non-breaking: Only creates a new task when toggling a recurring task to done.
+      // Non-recurring tasks and toggling back to not-done are unchanged. The new optional
+      // `recurrence` field defaults to undefined (no migration needed), so existing data is unaffected.
       if (toggledToDone && selectedTask.recurrence && selectedTask.recurrence !== "none") {
         const nextDeadline = selectedTask.deadline
           ? getNextRecurrenceDate(new Date(selectedTask.deadline), selectedTask.recurrence)
