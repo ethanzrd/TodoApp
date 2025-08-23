@@ -27,7 +27,12 @@ import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
-import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import {
+  calculateDateDifference,
+  generateUUID,
+  showToast,
+  getNextRecurrenceDate,
+} from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,18 +75,39 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+      const toggledToDone = !selectedTask.done;
+      const baseUpdated = tasks.map((task) => {
         if (task.id === selectedTaskId) {
-          return { ...task, done: !task.done, lastSave: new Date() };
+          return { ...task, done: toggledToDone, lastSave: new Date() };
         }
         return task;
       });
+
+      let finalTasks = baseUpdated;
+      // Non-breaking: Only creates a new task when toggling a recurring task to done.
+      // Non-recurring tasks and toggling back to not-done are unchanged. The new optional
+      // `recurrence` field defaults to undefined (no migration needed), so existing data is unaffected.
+      if (toggledToDone && selectedTask.recurrence && selectedTask.recurrence !== "none") {
+        const nextDeadline = selectedTask.deadline
+          ? getNextRecurrenceDate(new Date(selectedTask.deadline), selectedTask.recurrence)
+          : undefined;
+        const nextOccurrence: Task = {
+          ...selectedTask,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: nextDeadline,
+          lastSave: undefined,
+        };
+        finalTasks = [...baseUpdated, nextOccurrence];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: finalTasks,
       }));
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+      const allTasksDone = finalTasks.every((task) => task.done);
 
       if (allTasksDone) {
         showToast(
