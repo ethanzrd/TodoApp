@@ -27,7 +27,12 @@ import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
-import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import {
+  calculateDateDifference,
+  generateUUID,
+  showToast,
+  calculateNextOccurrence,
+} from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,18 +75,51 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      const selectedTask = tasks.find((task) => task.id === selectedTaskId);
+
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      if (selectedTask && !selectedTask.done && selectedTask.recurrence) {
+        const nextOccurrenceDate = calculateNextOccurrence(
+          selectedTask.deadline || selectedTask.date,
+          selectedTask.recurrence,
+        );
+
+        const nextTask: Task = {
+          ...selectedTask,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: selectedTask.deadline ? nextOccurrenceDate : undefined,
+          lastSave: undefined,
+        };
+
+        updatedTasks.push(nextTask);
+
+        showToast(
+          <div>
+            Task completed! Next occurrence created for{" "}
+            <b>{nextOccurrenceDate.toLocaleDateString()}</b>
+          </div>,
+          {
+            icon: <Done />,
+          },
+        );
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,
       }));
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+      const allTasksDone = updatedTasks
+        .filter((task) => !task.recurrence || task.done)
+        .every((task) => task.done);
 
       if (allTasksDone) {
         showToast(

@@ -5,7 +5,7 @@ import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
 import { IconButton, InputAdornment, Tooltip } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
-import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
+import { ColorPicker, TopBar, CustomEmojiPicker, RecurrenceSelect } from "../components";
 import { UserContext } from "../contexts/UserContext";
 import { useStorageState } from "../hooks/useStorageState";
 import { useTheme } from "@emotion/react";
@@ -34,6 +34,10 @@ const AddTask = () => {
     "categories",
     "sessionStorage",
   );
+  const [recurrence, setRecurrence] = useStorageState<{
+    type: "daily" | "weekly" | "monthly";
+    interval: number;
+  } | null>(null, "recurrence", "sessionStorage");
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
 
@@ -111,6 +115,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence: recurrence || undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +134,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -223,6 +236,16 @@ const AddTask = () => {
               />
             </div>
           )}
+
+          <div style={{ marginBottom: "14px" }}>
+            <br />
+            <RecurrenceSelect
+              recurrence={recurrence}
+              onRecurrenceChange={setRecurrence}
+              width="400px"
+              fontColor={getFontColor(theme.secondary)}
+            />
+          </div>
         </InputThemeProvider>
         <ColorPicker
           color={color}

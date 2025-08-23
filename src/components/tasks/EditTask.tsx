@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
+import { ColorPicker, CustomDialogTitle, CustomEmojiPicker, RecurrenceSelect } from "..";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../../constants";
 import { UserContext } from "../../contexts/UserContext";
 import { DialogBtn } from "../../styles";
@@ -33,6 +33,10 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const [editedTask, setEditedTask] = useState<Task | undefined>(task);
   const [emoji, setEmoji] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [recurrence, setRecurrence] = useState<{
+    type: "daily" | "weekly" | "monthly";
+    interval: number;
+  } | null>(null);
 
   const theme = useTheme();
 
@@ -58,6 +62,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   useEffect(() => {
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
+    setRecurrence(task?.recurrence || null);
   }, [task]);
 
   // Event handler for input changes in the form fields.
@@ -84,6 +89,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -106,6 +112,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     onClose();
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
+    setRecurrence(task?.recurrence || null);
   };
 
   useEffect(() => {
@@ -249,6 +256,14 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             onCategoryChange={(categories) => setSelectedCategories(categories)}
           />
         )}
+
+        <div style={{ marginBottom: "14px" }}>
+          <RecurrenceSelect
+            recurrence={recurrence}
+            onRecurrenceChange={setRecurrence}
+            fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
+          />
+        </div>
         <div
           style={{
             display: "flex",
