@@ -34,6 +34,7 @@ const AddTask = () => {
     "categories",
     "sessionStorage",
   );
+  // Recurrence settings for creating recurring tasks (daily, weekly, monthly)
   const [recurrenceType, setRecurrenceType] = useStorageState<string>(
     "none",
     "recurrenceType",
