@@ -28,6 +28,7 @@ import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
 import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { createNextOccurrence } from "../../utils/recurrenceUtils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,12 +71,38 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+
+      const taskToUpdate = tasks.find((task) => task.id === selectedTaskId);
+      if (!taskToUpdate) return;
+
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      if (
+        !taskToUpdate.done &&
+        taskToUpdate.recurrenceType &&
+        taskToUpdate.recurrenceType !== "none"
+      ) {
+        try {
+          const nextOccurrence = createNextOccurrence(taskToUpdate);
+          updatedTasks.push(nextOccurrence);
+
+          showToast(
+            <div>
+              Task completed! Next occurrence created for{" "}
+              <b>{nextOccurrence.deadline?.toLocaleDateString()}</b>
+            </div>,
+            { icon: "🔄" },
+          );
+        } catch (error) {
+          console.error("Error creating next occurrence:", error);
+        }
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,

@@ -57,6 +57,14 @@ export interface Task {
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
   position?: number;
+  /**
+   * Recurrence type for repeating tasks
+   */
+  recurrenceType?: "none" | "daily" | "weekly" | "monthly";
+  /**
+   * Interval for recurrence (e.g., every 2 days, every 3 weeks)
+   */
+  recurrenceInterval?: number;
 }
 
 /**

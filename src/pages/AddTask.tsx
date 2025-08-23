@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip, MenuItem } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -32,6 +32,16 @@ const AddTask = () => {
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
     [],
     "categories",
+    "sessionStorage",
+  );
+  const [recurrenceType, setRecurrenceType] = useStorageState<string>(
+    "none",
+    "recurrenceType",
+    "sessionStorage",
+  );
+  const [recurrenceInterval, setRecurrenceInterval] = useStorageState<number>(
+    1,
+    "recurrenceInterval",
     "sessionStorage",
   );
 
@@ -111,6 +121,9 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrenceType:
+        recurrenceType !== "none" ? (recurrenceType as "daily" | "weekly" | "monthly") : undefined,
+      recurrenceInterval: recurrenceType !== "none" ? recurrenceInterval : undefined,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +142,16 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrenceType",
+      "recurrenceInterval",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +233,34 @@ const AddTask = () => {
               },
             }}
           />
+
+          <StyledInput
+            select
+            label="Recurrence"
+            value={recurrenceType}
+            onChange={(e) => setRecurrenceType(e.target.value)}
+            sx={{
+              colorScheme: isDark(theme.secondary) ? "dark" : "light",
+            }}
+          >
+            <MenuItem value="none">No recurrence</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </StyledInput>
+
+          {recurrenceType !== "none" && (
+            <StyledInput
+              type="number"
+              label={`Repeat every (${recurrenceType === "daily" ? "days" : recurrenceType === "weekly" ? "weeks" : "months"})`}
+              value={recurrenceInterval}
+              onChange={(e) => setRecurrenceInterval(parseInt(e.target.value) || 1)}
+              inputProps={{ min: 1, max: 365 }}
+              sx={{
+                colorScheme: isDark(theme.secondary) ? "dark" : "light",
+              }}
+            />
+          )}
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>

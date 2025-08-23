@@ -9,6 +9,7 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -33,6 +34,8 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const [editedTask, setEditedTask] = useState<Task | undefined>(task);
   const [emoji, setEmoji] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [recurrenceType, setRecurrenceType] = useState<string>("none");
+  const [recurrenceInterval, setRecurrenceInterval] = useState<number>(1);
 
   const theme = useTheme();
 
@@ -58,6 +61,8 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   useEffect(() => {
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
+    setRecurrenceType(task?.recurrenceType || "none");
+    setRecurrenceInterval(task?.recurrenceInterval || 1);
   }, [task]);
 
   // Event handler for input changes in the form fields.
@@ -84,6 +89,11 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrenceType:
+              recurrenceType !== "none"
+                ? (recurrenceType as "daily" | "weekly" | "monthly")
+                : undefined,
+            recurrenceInterval: recurrenceType !== "none" ? recurrenceInterval : undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +251,34 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <StyledInput
+          select
+          label="Recurrence"
+          value={recurrenceType}
+          onChange={(e) => setRecurrenceType(e.target.value)}
+          sx={{
+            colorScheme: theme.darkmode ? "dark" : "light",
+          }}
+        >
+          <MenuItem value="none">No recurrence</MenuItem>
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </StyledInput>
+
+        {recurrenceType !== "none" && (
+          <StyledInput
+            type="number"
+            label={`Repeat every (${recurrenceType === "daily" ? "days" : recurrenceType === "weekly" ? "weeks" : "months"})`}
+            value={recurrenceInterval}
+            onChange={(e) => setRecurrenceInterval(parseInt(e.target.value) || 1)}
+            inputProps={{ min: 1, max: 365 }}
+            sx={{
+              colorScheme: theme.darkmode ? "dark" : "light",
+            }}
+          />
+        )}
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect
