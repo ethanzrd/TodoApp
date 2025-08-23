@@ -117,3 +117,27 @@ export const calculateDateDifference = (
   // beyond 7 days
   return rtf.format(dayDiff, "day");
 };
+
+/**
+ * Returns the next deadline based on recurrence type, preserving the time component.
+ */
+export const getNextRecurrenceDate = (
+  current: Date,
+  recurrence: "daily" | "weekly" | "monthly" | "none",
+): Date => {
+  const d = new Date(current);
+  switch (recurrence) {
+    case "daily":
+      d.setDate(d.getDate() + 1);
+      return d;
+    case "weekly":
+      d.setDate(d.getDate() + 7);
+      return d;
+    case "monthly":
+      d.setMonth(d.getMonth() + 1);
+      return d;
+    case "none":
+    default:
+      return d;
+  }
+};

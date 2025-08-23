@@ -1,9 +1,9 @@
-import { Category, Task } from "../types/user";
+import { Category, Task, Recurrence } from "../types/user";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip, MenuItem } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -32,6 +32,11 @@ const AddTask = () => {
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
     [],
     "categories",
+    "sessionStorage",
+  );
+  const [recurrence, setRecurrence] = useStorageState<Recurrence>(
+    "none",
+    "recurrence",
     "sessionStorage",
   );
 
@@ -111,6 +116,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      recurrence,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +135,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "recurrence",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +225,25 @@ const AddTask = () => {
               },
             }}
           />
+          <StyledInput
+            label="Recurrence"
+            name="recurrence"
+            select
+            value={recurrence}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setRecurrence((e.target.value as Recurrence) || "none")
+            }
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
+          >
+            <MenuItem value="none">Does not repeat</MenuItem>
+            <MenuItem value="daily">Daily</MenuItem>
+            <MenuItem value="weekly">Weekly</MenuItem>
+            <MenuItem value="monthly">Monthly</MenuItem>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>

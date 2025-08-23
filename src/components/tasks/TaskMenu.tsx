@@ -28,6 +28,7 @@ import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { Task } from "../../types/user";
 import { calculateDateDifference, generateUUID, showToast } from "../../utils";
+import { getNextRecurrenceDate } from "../../utils/timeUtils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -70,12 +71,33 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
-      const updatedTasks = tasks.map((task) => {
+
+      const original = tasks.find((t) => t.id === selectedTaskId);
+      const wasDone = original?.done ?? false;
+      const recurrence = (original as Task | undefined)?.recurrence || "none";
+      const hasDeadline = Boolean(original?.deadline);
+
+      let updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      if (!wasDone && hasDeadline && recurrence && recurrence !== "none") {
+        const base = original as Task;
+        const nextDeadline = getNextRecurrenceDate(new Date(base.deadline as Date), recurrence);
+        const nextTask: Task = {
+          ...base,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: nextDeadline,
+          lastSave: undefined,
+        };
+        updatedTasks = [...updatedTasks, nextTask];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
         tasks: updatedTasks,
