@@ -9,13 +9,14 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../../constants";
 import { UserContext } from "../../contexts/UserContext";
 import { DialogBtn } from "../../styles";
-import { Category, Task } from "../../types/user";
+import { Category, Task, Recurrence } from "../../types/user";
 import { formatDate, showToast, timeAgo } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { ColorPalette } from "../../theme/themeConfig";
@@ -84,6 +85,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            recurrence: editedTask.recurrence || undefined,
             lastSave: new Date(),
           };
         }
@@ -243,11 +245,32 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
         />
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
-          <CategorySelect
-            fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
-            selectedCategories={selectedCategories}
-            onCategoryChange={(categories) => setSelectedCategories(categories)}
-          />
+          <>
+            <CategorySelect
+              fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
+              selectedCategories={selectedCategories}
+              onCategoryChange={(categories) => setSelectedCategories(categories)}
+            />
+            <StyledInput
+              label="Recurrence"
+              name="recurrence"
+              select
+              value={editedTask?.recurrence || "none"}
+              onChange={(e) =>
+                setEditedTask((prev) => ({
+                  ...(prev as Task),
+                  recurrence:
+                    e.target.value === "none" ? undefined : (e.target.value as Recurrence),
+                }))
+              }
+              sx={{ mt: 1 }}
+            >
+              <MenuItem value="none">None</MenuItem>
+              <MenuItem value="daily">Daily</MenuItem>
+              <MenuItem value="weekly">Weekly</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+            </StyledInput>
+          </>
         )}
         <div
           style={{

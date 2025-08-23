@@ -1,3 +1,5 @@
+import type { Recurrence } from "../types/user";
+
 const MS_IN_MINUTE = 60 * 1000;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 const MS_IN_DAY = 24 * MS_IN_HOUR;
@@ -116,4 +118,16 @@ export const calculateDateDifference = (
 
   // beyond 7 days
   return rtf.format(dayDiff, "day");
+};
+
+export const shiftDateByRecurrence = (input: Date, recurrence: Recurrence): Date => {
+  const d = new Date(input);
+  if (recurrence === "daily") {
+    d.setDate(d.getDate() + 1);
+  } else if (recurrence === "weekly") {
+    d.setDate(d.getDate() + 7);
+  } else if (recurrence === "monthly") {
+    d.setMonth(d.getMonth() + 1);
+  }
+  return d;
 };

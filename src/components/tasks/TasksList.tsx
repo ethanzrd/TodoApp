@@ -28,8 +28,9 @@ import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
-import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import type { Category, Task, UUID, Recurrence } from "../../types/user";
+import { getFontColor, showToast, generateUUID } from "../../utils";
+import { shiftDateByRecurrence } from "../../utils/timeUtils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,17 +268,26 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
+    setUser((prevUser) => {
+      const updated = prevUser.tasks.map((task) => {
         if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
           return { ...task, done: true, lastSave: new Date() };
         }
         return task;
-      }),
-    }));
-    // Clear the selected task IDs after the operation
+      });
+      const originals = prevUser.tasks.filter((t) => multipleSelectedTasks.includes(t.id));
+      const nexts: Task[] = originals
+        .filter((o) => !o.done && o.deadline && o.recurrence)
+        .map((o) => ({
+          ...o,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: shiftDateByRecurrence(new Date(o.deadline as Date), o.recurrence as Recurrence),
+          lastSave: undefined,
+        }));
+      return { ...prevUser, tasks: [...updated, ...nexts] };
+    });
     setMultipleSelectedTasks([]);
   };
 

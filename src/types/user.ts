@@ -53,6 +53,7 @@ export interface Task {
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
+  recurrence?: Recurrence;
   /**
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
@@ -93,3 +94,4 @@ export interface AppSettings {
 
 export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom";
 export type ReduceMotionOption = "system" | "on" | "off";
+export type Recurrence = "daily" | "weekly" | "monthly";
