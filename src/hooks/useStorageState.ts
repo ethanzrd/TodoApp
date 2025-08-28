@@ -36,7 +36,12 @@ export function useStorageState<T>(
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === key && event.newValue !== null && event.key !== "") {
-        setValue(event.newValue);
+        try {
+          setValue(JSON.parse(event.newValue));
+        } catch {
+          // If parsing fails, fallback to setting the raw value
+          setValue(event.newValue as unknown as T);
+        }
       }
     };
 
