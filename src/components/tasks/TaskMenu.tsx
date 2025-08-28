@@ -26,7 +26,7 @@ import "react-spring-bottom-sheet/dist/style.css";
 import { TaskIcon, TaskItem } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
-import { Task } from "../../types/user";
+import { Recurrence, Task } from "../../types/user";
 import { calculateDateDifference, generateUUID, showToast } from "../../utils";
 import { useTheme } from "@emotion/react";
 import { TaskContext } from "../../contexts/TaskContext";
@@ -66,22 +66,55 @@ export const TaskMenu = () => {
     n(`/task/${taskId}`);
   };
 
+  const getNextDate = (date: Date, recurrence: Recurrence): Date => {
+    const next = new Date(date);
+    switch (recurrence) {
+      case "daily":
+        next.setDate(next.getDate() + 1);
+        break;
+      case "weekly":
+        next.setDate(next.getDate() + 7);
+        break;
+      case "monthly":
+        next.setMonth(next.getMonth() + 1);
+        break;
+    }
+    return next;
+  };
+
   const handleMarkAsDone = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      const selected = tasks.find((t) => t.id === selectedTaskId);
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
+
+      let finalTasks = updatedTasks;
+      if (selected && !selected.done && selected.recurrence) {
+        const nextTask: Task = {
+          ...selected,
+          id: generateUUID(),
+          done: false,
+          date: new Date(),
+          deadline: selected.deadline
+            ? getNextDate(new Date(selected.deadline), selected.recurrence)
+            : undefined,
+          lastSave: new Date(),
+        };
+        finalTasks = [...updatedTasks, nextTask];
+      }
+
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: finalTasks,
       }));
 
-      const allTasksDone = updatedTasks.every((task) => task.done);
+      const allTasksDone = finalTasks.every((task) => task.done);
 
       if (allTasksDone) {
         showToast(
