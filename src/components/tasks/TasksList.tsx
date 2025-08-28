@@ -29,7 +29,7 @@ import { useStorageState } from "../../hooks/useStorageState";
 import { DialogBtn } from "../../styles";
 import { ColorPalette } from "../../theme/themeConfig";
 import type { Category, Task, UUID } from "../../types/user";
-import { getFontColor, showToast } from "../../utils";
+import { getFontColor, showToast, generateUUID } from "../../utils";
 import {
   NoTasks,
   RingAlarm,
@@ -267,16 +267,30 @@ export const TasksList: React.FC = () => {
   };
 
   const handleMarkSelectedAsDone = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      tasks: prevUser.tasks.map((task) => {
+    setUser((prevUser) => {
+      const newTasks: Task[] = [];
+      const updatedTasks = prevUser.tasks.map((task) => {
         if (multipleSelectedTasks.includes(task.id)) {
-          // Mark the task as done if selected
+          if (!task.done && task.recurrence) {
+            const nextDate = task.deadline ? new Date(task.deadline) : new Date();
+            if (task.recurrence === "daily") nextDate.setDate(nextDate.getDate() + 1);
+            if (task.recurrence === "weekly") nextDate.setDate(nextDate.getDate() + 7);
+            if (task.recurrence === "monthly") nextDate.setMonth(nextDate.getMonth() + 1);
+            newTasks.push({
+              ...task,
+              id: generateUUID(),
+              done: false,
+              date: new Date(),
+              deadline: nextDate,
+              lastSave: undefined,
+            });
+          }
           return { ...task, done: true, lastSave: new Date() };
         }
         return task;
-      }),
-    }));
+      });
+      return { ...prevUser, tasks: [...updatedTasks, ...newTasks] };
+    });
     // Clear the selected task IDs after the operation
     setMultipleSelectedTasks([]);
   };
