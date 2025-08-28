@@ -225,7 +225,6 @@ const AddTask = () => {
               },
             }}
           />
-
           <StyledInput
             select
             label="Recurrence"
@@ -237,7 +236,7 @@ const AddTask = () => {
             <MenuItem value="weekly">Weekly</MenuItem>
             <MenuItem value="monthly">Monthly</MenuItem>
           </StyledInput>
-
+          {/* Recurrence selector drop-down */}
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>
               <br />
