@@ -46,7 +46,7 @@
 
 ### 🔗 Share Tasks by Link or QR Code
 
-Easily share your tasks with others using a link or QR code.
+Easily share tasks with others using a link or QR code.
 
 **[Example Link](https://react-cool-todo-app.netlify.app/share?task=N4IgJg9gdgpiBcAzAhgGwM4wDQgA4EspYwEAXAJwFdsQpkBbOeEAdRgCN19SYACAERgA3GKgi5GUUiBxgY6AMbl8uUvmgIQAYXIxkPXsl6pkUMIQDmvXMgt8A7twAWvAEp6FpAHQArdL0QIcl4FVHwYKS9eJ1JSXHR4AHpE+1SvAE8ISlJKdhgvBQh6FP0FJwB+IQBedgBZAGsoRABpAA0ASQAxAEEADgAyUiqAJgBmdH7kdgB9MtNYVCrEXRgtCDktBlwvIIsZEBh6CB98TQBGRABOMDOAWgvRxAVb4YAGV7B7xAAWdnZ9wpiciaADE7AAbMNvohEPswPomCA3sMAKy3V7fF6vAAqrzO8DOl3gr3BXleAHZRgAtOF6MBhWCaZFojEvUa4-FnXrE15k940nAKBEWILpBAAbVA+BIzFew0uwwU7GQaMQ4Jgw1u3zOCkx7BRyHJtwUKMuyFeyGQMAUiBgo32dEYmhYQXq+0Ox1OzAeGoBECBoKhvRgMJAAF8sFKZWdwb1yWdUdryd9waMyaMcI7EWtzFA9jgPSdzogDaqYK9YYL-UFQeCbsNQ2GALo4EzoUgAZWQIiZcpZmLeHPgb3go15oxR1PDQA&userName=Maciej)**
 
@@ -56,7 +56,7 @@ Easily share your tasks with others using a link or QR code.
 
 This feature uses Chrome’s experimental `window.LanguageModel` API powered by **Gemini Nano** — an on-device LLM.
 
-⚠️ Requires **Chrome Canary 128+** with the **Gemini Nano model installed** - [Setup guide](https://docs.google.com/document/d/1VG8HIyz361zGduWgNG7R_R8Xkv0OOJ8b5C9QKeCjU0c/view?pli=1&tab=t.0#heading=h.witohboigk0o)
+⚠️ Requires **Chrome Canary 128+** with the **Gemini Nano model installed** — see the [setup guide](https://docs.google.com/document/d/1VG8HIyz361zGduWgNG7R_R8Xkv0OOJ8b5C9QKeCjU0c/view?pli=1&tab=t.0#heading=h.witohboigk0o)
 
 Code: [src/components/EmojiPicker.tsx](https://github.com/maciekt07/TodoApp/blob/main/src/components/EmojiPicker.tsx#L116)
 
@@ -64,7 +64,7 @@ Code: [src/components/EmojiPicker.tsx](https://github.com/maciekt07/TodoApp/blob
 
 ### 🔄 P2P Task Sync with WebRTC
 
-Securely sync all the data between devices using peer-to-peer WebRTC connections. Devices pair via QR code, and your data is transferred directly between them — only minimal server involvement for connection setup, with no data stored or processed in the cloud.
+Securely sync data between devices using peer-to-peer WebRTC connections. Devices pair via QR code, and data is transferred directly between them with only minimal server involvement for connection setup—no data is stored or processed in the cloud.
 
 - Tasks and categories are auto-merged based on recent edits or deletions
 - For settings and other data, you choose which device to sync from
@@ -79,23 +79,23 @@ Choose from various color themes and toggle between light and dark modes to suit
 
 ### 🗣️ Task Reading Aloud
 
-Option to have tasks read aloud using the native `SpeechSynthesis` API, with a selection of voices to choose from.
+Have tasks read aloud using the native `SpeechSynthesis` API and choose from a selection of voices.
 
 <img src="https://raw.githubusercontent.com/maciekt07/TodoApp/main/screenshots/ReadAloud.png" width="260px" alt="Task Reading Aloud" />
 
 ### 📥 Import/Export Tasks
 
-Users can import and export tasks to/from JSON files. This feature allows users to back up their tasks or transfer them to other devices easily. [Example Import File](https://github.com/maciekt07/TodoApp/blob/main/example-import.json)
+Import and export tasks using JSON files. This feature lets you back up tasks or transfer them to other devices easily. [Example Import File](https://github.com/maciekt07/TodoApp/blob/main/example-import.json)
 
 ### 📴 Progressive Web App (PWA)
 
-This app is a Progressive Web App (PWA), which means it can be installed on your device, **used even when you're offline** and behave like a native app with shortcuts and app badges.
+This app is a Progressive Web App (PWA), which means you can install it on your device, **use it even when you're offline**, and it behaves like a native app with shortcuts and app badges.
 
 <img src="https://raw.githubusercontent.com/maciekt07/TodoApp/main/screenshots/pwaTaskBar.png" alt="taskbar" width="260px" />
 
 ### 🔄 Update Prompt
 
-The app features a custom update prompt that notifies users when a new version is available, allowing for easy refresh to access the latest improvements.
+The app features a custom update prompt that notifies users when a new version is available, making it easy to refresh and access the latest improvements.
 
 <img src="https://raw.githubusercontent.com/maciekt07/TodoApp/main/screenshots/UpdatePrompt.png" alt="update prompt" width="260px" />
 
@@ -105,7 +105,7 @@ The app automatically generates custom splash screens from a single HTML templat
 
 <img src="https://raw.githubusercontent.com/maciekt07/TodoApp/main/screenshots/SplashScreen.png" alt="Splash Screen Example" width="450px" />
 
-To generate splash screens: `npm run generate-splash`
+Generate splash screens with `npm run generate-splash`.
 
 ## 👨‍💻 Installation
 
