@@ -51,6 +51,7 @@ export interface Task {
   date: Date;
   deadline?: Date;
   category?: Category[];
+  recurrence?: Recurrence;
   lastSave?: Date;
   sharedBy?: string;
   /**
@@ -58,6 +59,8 @@ export interface Task {
    */
   position?: number;
 }
+
+export type Recurrence = "daily" | "weekly" | "monthly";
 
 /**
  * Represents a category in the application.
