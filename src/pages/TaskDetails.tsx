@@ -90,6 +90,12 @@ const TaskDetails = () => {
                 <TableData>{dateFormatter.format(new Date(task.deadline))}</TableData>
               </TableRow>
             )}
+            {task?.recurrence && (
+              <TableRow>
+                <TableHeader>Recurrence:</TableHeader>
+                <TableData>{task.recurrence}</TableData>
+              </TableRow>
+            )}
             <TableRow>
               <TableHeader>Done:</TableHeader>
               <TableData>

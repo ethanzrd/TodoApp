@@ -70,15 +70,30 @@ export const TaskMenu = () => {
     // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
+      const newTasks: Task[] = [];
       const updatedTasks = tasks.map((task) => {
         if (task.id === selectedTaskId) {
+          if (!task.done && task.recurrence) {
+            const nextDate = task.deadline ? new Date(task.deadline) : new Date();
+            if (task.recurrence === "daily") nextDate.setDate(nextDate.getDate() + 1);
+            if (task.recurrence === "weekly") nextDate.setDate(nextDate.getDate() + 7);
+            if (task.recurrence === "monthly") nextDate.setMonth(nextDate.getMonth() + 1);
+            newTasks.push({
+              ...task,
+              id: generateUUID(),
+              done: false,
+              date: new Date(),
+              deadline: nextDate,
+              lastSave: undefined,
+            });
+          }
           return { ...task, done: !task.done, lastSave: new Date() };
         }
         return task;
       });
       setUser((prevUser) => ({
         ...prevUser,
-        tasks: updatedTasks,
+        tasks: [...updatedTasks, ...newTasks],
       }));
 
       const allTasksDone = updatedTasks.every((task) => task.done);
